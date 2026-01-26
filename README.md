@@ -154,6 +154,25 @@ Claude has a **context window** - the amount of conversation history it can "see
 
 This gives Claude a fresh start with its full context window available for your new task.
 
+### 4. Set Up Your Repository with /init
+
+When you start working in a new repository, run `/init` to create a `CLAUDE.md` file. Claude will analyze the codebase and document:
+
+- **Build and test commands** - How to run, test, and lint the project
+- **Architecture overview** - Key directories, patterns, and design decisions
+- **Project-specific context** - Important details that require reading multiple files to understand
+
+Future Claude sessions in this repository will read `CLAUDE.md` automatically, giving them a head start instead of exploring from scratch.
+
+```
+/init
+```
+
+This is especially valuable for:
+- Repositories you'll work in repeatedly
+- Projects with non-obvious build systems or conventions
+- Codebases where you want consistent Claude behavior across sessions
+
 ---
 
 ## Extending Claude Code
