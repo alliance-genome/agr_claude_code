@@ -1,6 +1,7 @@
 ---
-name: alliance-jira
+name: jira
 description: Use when asked to create, search, update, or transition Jira tickets. Use when user mentions KANBAN, SCRUM, AGRHELP, or MOD projects. Use when needing ticket status, assignments, or board views.
+argument-hint: [ticket-key or search query]
 ---
 
 # Alliance Jira Skill
@@ -41,17 +42,17 @@ Load these files only when needed for the specific task:
 
 | Task | File |
 |------|------|
-| **First-time setup** | setup.md |
-| Search with JQL | operations/search-tickets.md |
-| Get/view a ticket | operations/read-tickets.md |
-| Create a ticket | operations/create-tickets.md |
-| Change status | operations/update-tickets.md |
-| Add comments/links | operations/update-tickets.md |
-| Projects & boards | reference/projects.md |
-| Issue types & fields | reference/issue-types.md |
-| Statuses & transitions | reference/statuses.md |
-| Components | reference/components.md |
-| Priorities | reference/priorities.md |
+| **First-time setup** | [setup.md](setup.md) |
+| Search with JQL | [operations/search-tickets.md](operations/search-tickets.md) |
+| Get/view a ticket | [operations/read-tickets.md](operations/read-tickets.md) |
+| Create a ticket | [operations/create-tickets.md](operations/create-tickets.md) |
+| Change status | [operations/update-tickets.md](operations/update-tickets.md) |
+| Add comments/links | [operations/update-tickets.md](operations/update-tickets.md) |
+| Projects & boards | [reference/projects.md](reference/projects.md) |
+| Issue types & fields | [reference/issue-types.md](reference/issue-types.md) |
+| Statuses & transitions | [reference/statuses.md](reference/statuses.md) |
+| Components | [reference/components.md](reference/components.md) |
+| Priorities | [reference/priorities.md](reference/priorities.md) |
 
 ---
 

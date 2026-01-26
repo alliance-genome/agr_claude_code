@@ -1,6 +1,7 @@
 ---
 name: secure-repo
 description: Use when asked to add secret scanning, install git hooks, protect against committing API keys/passwords/tokens, set up security for a repo, or after running git clone on a new repository.
+argument-hint: [repo-path]
 ---
 
 # Secure Repository - Secret Scanning Hooks
