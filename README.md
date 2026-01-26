@@ -121,7 +121,7 @@ You: I want to add caching to the API client. Before writing any code, please ex
      the codebase and write a plan to docs/plans/api-caching.md
 ```
 
-> **For complex or large projects:** Install the [Superpowers plugin](#superpowers-planning--execution-for-complex-projects) which automates this entire workflow with `/superpowers:brainstorming` and `/superpowers:writing-plans`.
+> **For complex or large projects:** Install the [Superpowers plugin](#advanced-superpowers-plugin) which automates this entire workflow with `/superpowers:brainstorming` and `/superpowers:writing-plans`.
 
 ### 2. Request Code Reviews After Major Changes
 
@@ -189,62 +189,19 @@ Example requests:
 
 ---
 
-#### Superpowers (Recommended)
+#### Dictation with Whispering
 
-Superpowers transforms Claude from an eager junior developer into a disciplined senior engineer that plans before coding, tests before shipping, and can work autonomously for hours without drifting off course.
+Typing long prompts gets tiring. [Whispering](https://github.com/EpicenterHQ/epicenter/tree/main/apps/whispering) is a free, open-source dictation app that transcribes speech and copies it to your clipboard - press a hotkey, speak, paste into Claude Code.
 
-**Installation** (from official Claude marketplace - no setup needed, it's built-in):
-```
-/plugin install superpowers@claude-plugins-official
-```
+**Setup:**
 
-**Why use it?**
-- Claude brainstorms with you before writing any code
-- Work gets broken into small, verifiable tasks
-- Fresh subagents handle each task with built-in code review
-- Progress is saved to markdown files, so you never lose context between sessions
-- Enforces test-driven development (TDD) automatically
+1. **Download Whispering** from the [releases page](https://github.com/EpicenterHQ/epicenter/releases) (~22MB)
+2. **Get a Groq API key** (free) at [console.groq.com](https://console.groq.com)
+3. **Configure Whispering** to use Groq with the `whisper-large-v3-turbo` model
 
-**Key commands:**
+**Cost:** Groq is pay-as-you-go (not a subscription) at ~$0.04/hour. Most developers spend less than $1/month.
 
-| Command | What it does |
-|---------|--------------|
-| `/superpowers:brainstorming` | Interactive design refinement. Claude asks questions one at a time to fully understand what you want to build before any code is written. |
-| `/superpowers:writing-plans` | Creates detailed implementation plans with bite-sized tasks, file paths, and verification steps. |
-| `/superpowers:executing-plans` | Executes plans in batches with checkpoints for your review between each batch. |
-| `/superpowers:writing-skills` | For creating or editing new skills (advanced usage). |
-
-The plugin also includes additional skills for debugging, TDD, code review, and git workflows that activate automatically when needed.
-
-**The typical workflow:**
-
-1. **Brainstorm** - You describe what you want. Claude asks questions, explores design alternatives, and presents ideas in digestible chunks.
-2. **Plan** - Claude writes a detailed plan, breaking work into small tasks with exact file paths and verification steps.
-3. **Execute** - Fresh subagents work through each task. Each task gets a two-stage review: first against the specification, then for code quality.
-4. **Review** - Claude reviews completed work against the original plan. Critical issues block progress until resolved.
-
-**When to use it:**
-- Starting a new feature or project
-- Refactoring complex code
-- Any task that would take more than 30 minutes
-- When you want Claude to work autonomously without going off-track
-
-**Example:**
-```
-You:    I want to add a gene expression visualization feature to the gene page.
-Claude: [Enters brainstorming mode, asks about data sources, chart types,
-        user interactions, performance requirements...]
-
-        Ready to write a plan?
-You:    Yes.
-Claude: [Writes detailed plan to docs/plans/gene-expression-viz.md]
-
-        Ready to execute?
-You:    Go.
-Claude: [Works through tasks autonomously, reviewing each one...]
-```
-
-For more details, see the [Superpowers GitHub repository](https://github.com/obra/superpowers).
+**Why Groq?** It's the fastest cloud option and extremely cheap. Local transcription (Whisper C++) is free but slower.
 
 ---
 
@@ -333,19 +290,64 @@ claude --dangerously-skip-permissions
 
 ---
 
-### Dictation with Whispering
+### Advanced: Superpowers Plugin
 
-Typing long prompts gets tiring. [Whispering](https://github.com/EpicenterHQ/epicenter/tree/main/apps/whispering) is a free, open-source dictation app that transcribes speech and copies it to your clipboard - press a hotkey, speak, paste into Claude Code.
+Superpowers transforms Claude from an eager junior developer into a disciplined senior engineer that plans before coding, tests before shipping, and can work autonomously for hours without drifting off course.
 
-**Setup:**
+**Installation** (from official Claude marketplace - no setup needed, it's built-in):
+```
+/plugin install superpowers@claude-plugins-official
+```
 
-1. **Download Whispering** from the [releases page](https://github.com/EpicenterHQ/epicenter/releases) (~22MB)
-2. **Get a Groq API key** (free) at [console.groq.com](https://console.groq.com)
-3. **Configure Whispering** to use Groq with the `whisper-large-v3-turbo` model
+**Why use it?**
+- Claude brainstorms with you before writing any code
+- Work gets broken into small, verifiable tasks
+- Fresh subagents handle each task with built-in code review
+- Progress is saved to markdown files, so you never lose context between sessions
+- Enforces test-driven development (TDD) automatically
 
-**Cost:** Groq is pay-as-you-go (not a subscription) at ~$0.04/hour. Most developers spend less than $1/month.
+**Key commands:**
 
-**Why Groq?** It's the fastest cloud option and extremely cheap. Local transcription (Whisper C++) is free but slower.
+| Command | What it does |
+|---------|--------------|
+| `/superpowers:brainstorming` | Interactive design refinement. Claude asks questions one at a time to fully understand what you want to build before any code is written. |
+| `/superpowers:writing-plans` | Creates detailed implementation plans with bite-sized tasks, file paths, and verification steps. |
+| `/superpowers:executing-plans` | Executes plans in batches with checkpoints for your review between each batch. |
+| `/superpowers:writing-skills` | For creating or editing new skills (advanced usage). |
+
+The plugin also includes additional skills for debugging, TDD, code review, and git workflows that activate automatically when needed.
+
+**The typical workflow:**
+
+1. **Brainstorm** - You describe what you want. Claude asks questions, explores design alternatives, and presents ideas in digestible chunks.
+2. **Plan** - Claude writes a detailed plan, breaking work into small tasks with exact file paths and verification steps.
+3. **Execute** - Fresh subagents work through each task. Each task gets a two-stage review: first against the specification, then for code quality.
+4. **Review** - Claude reviews completed work against the original plan. Critical issues block progress until resolved.
+
+**When to use it:**
+- Starting a new feature or project
+- Refactoring complex code
+- Any task that would take more than 30 minutes
+- When you want Claude to work autonomously without going off-track
+
+**Example:**
+```
+You:    I want to add a gene expression visualization feature to the gene page.
+Claude: [Enters brainstorming mode, asks about data sources, chart types,
+        user interactions, performance requirements...]
+
+        Ready to write a plan?
+You:    Yes.
+Claude: [Writes detailed plan to docs/plans/gene-expression-viz.md]
+
+        Ready to execute?
+You:    Go.
+Claude: [Works through tasks autonomously, reviewing each one...]
+```
+
+For more details, see the [Superpowers GitHub repository](https://github.com/obra/superpowers).
+
+---
 
 ### More Tips Coming Soon
 
