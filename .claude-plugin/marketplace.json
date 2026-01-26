@@ -12,6 +12,7 @@
     {
       "name": "alliance-jira",
       "source": "./plugins/alliance-jira",
+      "skills": ["./skills/jira"],
       "description": "Comprehensive Jira management for Alliance projects (KANBAN, SCRUM, AGRHELP, MOD). Create tickets, search issues, manage status transitions, and more.",
       "version": "1.0.0",
       "author": {
@@ -23,6 +24,7 @@
     {
       "name": "git-safety",
       "source": "./plugins/git-safety",
+      "skills": ["./skills/secure-repo"],
       "description": "Secret scanning pre-commit hooks using Gitleaks and TruffleHog. Blocks commits containing API keys, passwords, and tokens.",
       "version": "1.0.0",
       "author": {
