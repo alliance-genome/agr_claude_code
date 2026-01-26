@@ -50,15 +50,15 @@ You'll receive an email invitation to join the Alliance Anthropic organization o
 
 ### Step 2: Read the Official Quickstart
 
-> **Please take 10 minutes to read this:** [Claude Code Quickstart Guide](https://code.claude.com/docs/en/quickstart)
->
-> The official guide covers essential workflows that will save you hours:
-> - How to ask Claude effective questions
-> - Git integration (commits, branches, merge conflicts)
-> - Debugging and feature implementation patterns
-> - Pro tips that make a real difference
->
-> You'll get far more out of Claude Code if you understand its capabilities upfront.
+⚠️ **Please take 10 minutes to read this:** [Claude Code Quickstart Guide](https://code.claude.com/docs/en/quickstart)
+
+The official guide covers essential workflows that will save you hours:
+- How to ask Claude effective questions
+- Git integration (commits, branches, merge conflicts)
+- Debugging and feature implementation patterns
+- Pro tips that make a real difference
+
+You'll get far more out of Claude Code if you understand its capabilities upfront.
 
 ### Step 3: Install Claude Code
 
