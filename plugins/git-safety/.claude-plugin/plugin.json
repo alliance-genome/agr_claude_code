@@ -1,0 +1,11 @@
+{
+  "name": "git-safety",
+  "description": "Secret scanning pre-commit hooks using Gitleaks and TruffleHog. Blocks commits containing API keys, passwords, and tokens.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Christopher Tabone",
+    "email": "christopher.tabone@jax.org"
+  },
+  "homepage": "https://github.com/alliance-genome/agr_claude_code",
+  "keywords": ["git", "secrets", "security", "gitleaks", "trufflehog", "pre-commit", "hooks"]
+}

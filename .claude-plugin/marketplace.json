@@ -1,0 +1,35 @@
+{
+  "name": "alliance-plugins",
+  "owner": {
+    "name": "Christopher Tabone",
+    "email": "christopher.tabone@jax.org"
+  },
+  "metadata": {
+    "description": "Claude Code plugins for Alliance of Genome Resources developers",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "alliance-jira",
+      "source": "./plugins/alliance-jira",
+      "description": "Comprehensive Jira management for Alliance projects (KANBAN, SCRUM, AGRHELP, MOD). Create tickets, search issues, manage status transitions, and more.",
+      "version": "1.0.0",
+      "author": {
+        "name": "Christopher Tabone",
+        "email": "christopher.tabone@jax.org"
+      },
+      "keywords": ["jira", "kanban", "scrum", "tickets", "agile", "alliance", "agrhelp"]
+    },
+    {
+      "name": "git-safety",
+      "source": "./plugins/git-safety",
+      "description": "Secret scanning pre-commit hooks using Gitleaks and TruffleHog. Blocks commits containing API keys, passwords, and tokens.",
+      "version": "1.0.0",
+      "author": {
+        "name": "Christopher Tabone",
+        "email": "christopher.tabone@jax.org"
+      },
+      "keywords": ["git", "secrets", "security", "gitleaks", "trufflehog", "pre-commit", "hooks"]
+    }
+  ]
+}
