@@ -266,6 +266,51 @@ For more details, see the [Context7 documentation](https://context7.com/docs).
 
 ---
 
+#### Alliance: AGR MCP Server
+
+[AGR MCP Server](https://github.com/alliance-genome/agr-mcp-server-js) provides direct access to Alliance of Genome Resources genomics data. Query genes, diseases, orthologs, expression data, and more across 8 model organisms.
+
+**Why use it:**
+- Search genes across human, mouse, rat, zebrafish, fly, worm, yeast, and xenopus
+- Get disease associations, phenotypes, and alleles for genes
+- Find cross-species orthologs
+- Access expression data across tissues and developmental stages
+
+**Installation:**
+
+```bash
+claude mcp add agr-genomics -- npx -y agr-mcp-server
+```
+
+**Usage:**
+
+Ask questions naturally about Alliance data:
+
+```
+> Search for BRCA1 genes in human
+> What diseases are associated with TP53?
+> Find orthologs of the insulin gene
+> Show me expression data for daf-2 in worm
+```
+
+**Available Tools:**
+
+| Tool | Description |
+|------|-------------|
+| `search_genes` | Search genes with optional species filter |
+| `get_gene_info` | Detailed gene information (symbol, location, synonyms) |
+| `get_gene_diseases` | Disease associations for a gene |
+| `search_diseases` | Search diseases by name |
+| `get_gene_expression` | Expression data across tissues/stages |
+| `find_orthologs` | Cross-species homologs |
+| `get_gene_phenotypes` | Phenotype annotations |
+| `get_gene_interactions` | Molecular and genetic interactions |
+| `get_gene_alleles` | Alleles/variants for a gene |
+
+For more details, see the [AGR MCP Server repository](https://github.com/alliance-genome/agr-mcp-server-js).
+
+---
+
 ## Tips & Best Practices
 
 ### Speed Up with --dangerously-skip-permissions
