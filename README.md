@@ -450,7 +450,13 @@ For advanced workflows, the Alliance Agents plugin provides specialized agents f
 - **mcp-architect**: You want Claude to query your internal database, connect to a third-party API, or build any MCP integration
 - **product-manager**: You need to turn a vague feature idea into a structured PRD before implementation
 
-These agents are spawned automatically when relevant, or you can request them explicitly.
+**Usage:**
+
+Ask Claude to spawn a subagent for the task:
+```
+> Please spawn a subagent to create a PRD for adding user authentication to the curation tool.
+> Spawn a subagent to design an MCP server that connects to our internal strain database.
+```
 
 ---
 
