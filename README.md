@@ -95,6 +95,19 @@ brew install --cask claude-code
    > what does this project do?
    ```
 
+### Step 5: Set Your Model to Opus
+
+⚠️ **Important:** Claude Code defaults to Sonnet, but you'll get significantly better results with Opus. The Alliance Anthropic account includes Opus access at no extra cost to you.
+
+**Check and set your model:**
+```
+/model
+```
+
+Select **Opus** from the list. This setting persists across sessions.
+
+**Why Opus?** Opus is Claude's most capable model - it handles complex codebases better, makes fewer mistakes, and produces higher quality code. If you're finding Claude's suggestions unhelpful or off-target, check that you're using Opus.
+
 ### Additional Resources
 
 - [CLI Reference](https://code.claude.com/docs/en/cli-reference) - All commands and options
