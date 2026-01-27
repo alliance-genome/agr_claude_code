@@ -4,7 +4,7 @@
   "description": "Specialized agents for advanced Alliance development workflows. Includes MCP server architecture and PRD writing.",
   "author": {
     "name": "Paulo Nuin",
-    "email": "paulo.nuin@jax.org"
+    "email": "paulo.nuin@gmail.com"
   },
   "homepage": "https://github.com/alliance-genome/agr_claude_code",
   "keywords": ["agents", "mcp", "product-manager", "prd", "architecture"],
