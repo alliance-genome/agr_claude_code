@@ -432,7 +432,7 @@ Or invoke it through the Skill tool when you want Claude to build UI components 
 
 ### Alliance Agents Plugin
 
-For very advanced workflows, the Alliance Agents plugin provides specialized agents for specific tasks.
+For advanced workflows, the Alliance Agents plugin provides specialized agents for specific tasks.
 
 **Installation:**
 ```
