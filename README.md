@@ -11,6 +11,7 @@ Shared Claude Code configurations, plugins, and best practices for Alliance of G
   - [Plugins](#plugins)
   - [MCP Servers](#mcp-servers)
 - [Tips & Best Practices](#tips--best-practices)
+- [Advanced Usage](#advanced-usage)
 - [Contributing](#contributing)
 
 ---
@@ -121,7 +122,7 @@ You: I want to add caching to the API client. Before writing any code, please ex
      the codebase and write a plan to docs/plans/api-caching.md
 ```
 
-> **For complex or large projects:** Install the [Superpowers plugin](#advanced-superpowers-plugin) which automates this entire workflow with `/superpowers:brainstorming` and `/superpowers:writing-plans`.
+> **For complex or large projects:** Install the [Superpowers plugin](#superpowers-plugin) which automates this entire workflow with `/superpowers:brainstorming` and `/superpowers:writing-plans`.
 
 ### 2. Request Code Reviews After Major Changes
 
@@ -153,6 +154,25 @@ Claude has a **context window** - the amount of conversation history it can "see
 ```
 
 This gives Claude a fresh start with its full context window available for your new task.
+
+### 4. Set Up Your Repository with /init
+
+When you start working in a new repository, run `/init` to create a `CLAUDE.md` file. Claude will analyze the codebase and document:
+
+- **Build and test commands** - How to run, test, and lint the project
+- **Architecture overview** - Key directories, patterns, and design decisions
+- **Project-specific context** - Important details that require reading multiple files to understand
+
+Future Claude sessions in this repository will read `CLAUDE.md` automatically, giving them a head start instead of exploring from scratch.
+
+```
+/init
+```
+
+This is especially valuable for:
+- Repositories you'll work in repeatedly
+- Projects with non-obvious build systems or conventions
+- Codebases where you want consistent Claude behavior across sessions
 
 ---
 
@@ -266,6 +286,51 @@ For more details, see the [Context7 documentation](https://context7.com/docs).
 
 ---
 
+#### Alliance: AGR MCP Server
+
+[AGR MCP Server](https://github.com/alliance-genome/agr-mcp-server-js) provides direct access to Alliance of Genome Resources genomics data. Query genes, diseases, orthologs, expression data, and more across 8 model organisms.
+
+**Why use it:**
+- Search genes across human, mouse, rat, zebrafish, fly, worm, yeast, and xenopus
+- Get disease associations, phenotypes, and alleles for genes
+- Find cross-species orthologs
+- Access expression data across tissues and developmental stages
+
+**Installation:**
+
+```bash
+claude mcp add agr-genomics -- npx -y agr-mcp-server
+```
+
+**Usage:**
+
+Ask questions naturally about Alliance data:
+
+```
+> Search for BRCA1 genes in human
+> What diseases are associated with TP53?
+> Find orthologs of the insulin gene
+> Show me expression data for daf-2 in worm
+```
+
+**Available Tools:**
+
+| Tool | Description |
+|------|-------------|
+| `search_genes` | Search genes with optional species filter |
+| `get_gene_info` | Detailed gene information (symbol, location, synonyms) |
+| `get_gene_diseases` | Disease associations for a gene |
+| `search_diseases` | Search diseases by name |
+| `get_gene_expression` | Expression data across tissues/stages |
+| `find_orthologs` | Cross-species homologs |
+| `get_gene_phenotypes` | Phenotype annotations |
+| `get_gene_interactions` | Molecular and genetic interactions |
+| `get_gene_alleles` | Alleles/variants for a gene |
+
+For more details, see the [AGR MCP Server repository](https://github.com/alliance-genome/agr-mcp-server-js).
+
+---
+
 ## Tips & Best Practices
 
 ### Speed Up with --dangerously-skip-permissions
@@ -290,11 +355,24 @@ claude --dangerously-skip-permissions
 
 ---
 
-### Advanced: Superpowers Plugin
+### More Tips Coming Soon
+
+- Working with Alliance APIs (AGR APIs, JBrowse, etc.)
+- Code review workflows
+- Debugging strategies
+- Recommended settings and CLAUDE.md templates
+
+---
+
+## Advanced Usage
+
+These tools are for developers who want to push Claude Code further. They require more setup but provide powerful capabilities for complex projects.
+
+### Superpowers Plugin
 
 Superpowers transforms Claude from an eager junior developer into a disciplined senior engineer that plans before coding, tests before shipping, and can work autonomously for hours without drifting off course.
 
-**Installation** (from official Claude marketplace - no setup needed, it's built-in):
+**Installation** (from official Claude marketplace):
 ```
 /plugin install superpowers@claude-plugins-official
 ```
@@ -330,31 +408,49 @@ The plugin also includes additional skills for debugging, TDD, code review, and 
 - Any task that would take more than 30 minutes
 - When you want Claude to work autonomously without going off-track
 
-**Example:**
-```
-You:    I want to add a gene expression visualization feature to the gene page.
-Claude: [Enters brainstorming mode, asks about data sources, chart types,
-        user interactions, performance requirements...]
-
-        Ready to write a plan?
-You:    Yes.
-Claude: [Writes detailed plan to docs/plans/gene-expression-viz.md]
-
-        Ready to execute?
-You:    Go.
-Claude: [Works through tasks autonomously, reviewing each one...]
-```
-
 For more details, see the [Superpowers GitHub repository](https://github.com/obra/superpowers).
 
 ---
 
-### More Tips Coming Soon
+### Frontend Design with Claude
 
-- Working with Alliance APIs (AGR APIs, JBrowse, etc.)
-- Code review workflows
-- Debugging strategies
-- Recommended settings and CLAUDE.md templates
+Claude Code includes a built-in **frontend-design** skill that creates distinctive, production-grade frontend interfaces. Use this when building web components, pages, or applications that need polished visual design.
+
+**Usage:**
+```
+/frontend-design
+```
+
+Or invoke it through the Skill tool when you want Claude to build UI components with high design quality. The skill generates creative, polished code that avoids generic AI aesthetics.
+
+**Best for:**
+- Building new UI components or pages
+- Creating landing pages or marketing sites
+- Any frontend work where design quality matters
+
+---
+
+### Alliance Agents Plugin
+
+For very advanced workflows, the Alliance Agents plugin provides specialized agents for specific tasks.
+
+**Installation:**
+```
+/plugin install alliance-agents@alliance-plugins
+```
+
+**Available agents:**
+
+| Agent | What it does |
+|-------|--------------|
+| `mcp-architect` | Designs and implements MCP servers that connect Claude to external APIs. Use when you need to give Claude access to a new data source or service. |
+| `product-manager` | Creates comprehensive Product Requirements Documents (PRDs) from high-level feature requests. Produces executive-ready specs with metrics, requirements, and rollout plans. |
+
+**When to use:**
+- **mcp-architect**: You want Claude to query your internal database, connect to a third-party API, or build any MCP integration
+- **product-manager**: You need to turn a vague feature idea into a structured PRD before implementation
+
+These agents are spawned automatically when relevant, or you can request them explicitly.
 
 ---
 
