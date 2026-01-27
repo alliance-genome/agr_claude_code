@@ -416,6 +416,8 @@ For more details, see the [Superpowers GitHub repository](https://github.com/obr
 
 Claude Code includes a built-in **frontend-design** skill that creates distinctive, production-grade frontend interfaces. Use this when building web components, pages, or applications that need polished visual design.
 
+**Installation:** None required - this skill is built into Claude Code.
+
 **Usage:**
 
 Run the skill directly:
