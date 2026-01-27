@@ -417,11 +417,19 @@ For more details, see the [Superpowers GitHub repository](https://github.com/obr
 Claude Code includes a built-in **frontend-design** skill that creates distinctive, production-grade frontend interfaces. Use this when building web components, pages, or applications that need polished visual design.
 
 **Usage:**
+
+Run the skill directly:
 ```
 /frontend-design
 ```
 
-Or invoke it through the Skill tool when you want Claude to build UI components with high design quality. The skill generates creative, polished code that avoids generic AI aesthetics.
+Or ask Claude to use it when building UI:
+```
+> Build a dashboard component for displaying gene expression data. Use frontend-design for this.
+> Create a search results page with filtering. Please use the frontend-design skill.
+```
+
+The skill generates creative, polished code that avoids generic AI aesthetics.
 
 **Best for:**
 - Building new UI components or pages
