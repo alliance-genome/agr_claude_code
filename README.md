@@ -11,6 +11,7 @@ Shared Claude Code configurations, plugins, and best practices for Alliance of G
   - [Plugins](#plugins)
   - [MCP Servers](#mcp-servers)
 - [Tips & Best Practices](#tips--best-practices)
+- [Advanced Usage](#advanced-usage)
 - [Contributing](#contributing)
 
 ---
@@ -94,6 +95,19 @@ brew install --cask claude-code
    > what does this project do?
    ```
 
+### Step 5: Set Your Model to Opus
+
+⚠️ **Important:** Make sure your model is set to Opus for the best results.
+
+**Check and set your model:**
+```
+/model
+```
+
+Select **Opus** from the list. This setting persists across sessions.
+
+**Why Opus?** Opus is Claude's most capable model - it handles complex codebases better, makes fewer mistakes, and produces higher quality code. If you're finding Claude's suggestions unhelpful or off-target, check that you're using Opus.
+
 ### Additional Resources
 
 - [CLI Reference](https://code.claude.com/docs/en/cli-reference) - All commands and options
@@ -121,7 +135,7 @@ You: I want to add caching to the API client. Before writing any code, please ex
      the codebase and write a plan to docs/plans/api-caching.md
 ```
 
-> **For complex or large projects:** Install the [Superpowers plugin](#advanced-superpowers-plugin) which automates this entire workflow with `/superpowers:brainstorming` and `/superpowers:writing-plans`.
+> **For complex or large projects:** Install the [Superpowers plugin](#superpowers-plugin) which automates this entire workflow with `/superpowers:brainstorming` and `/superpowers:writing-plans`.
 
 ### 2. Request Code Reviews After Major Changes
 
@@ -354,11 +368,24 @@ claude --dangerously-skip-permissions
 
 ---
 
-### Advanced: Superpowers Plugin
+### More Tips Coming Soon
+
+- Working with Alliance APIs (AGR APIs, JBrowse, etc.)
+- Code review workflows
+- Debugging strategies
+- Recommended settings and CLAUDE.md templates
+
+---
+
+## Advanced Usage
+
+These tools are for developers who want to push Claude Code further. They require more setup but provide powerful capabilities for complex projects.
+
+### Superpowers Plugin
 
 Superpowers transforms Claude from an eager junior developer into a disciplined senior engineer that plans before coding, tests before shipping, and can work autonomously for hours without drifting off course.
 
-**Installation** (from official Claude marketplace - no setup needed, it's built-in):
+**Installation** (from official Claude marketplace):
 ```
 /plugin install superpowers@claude-plugins-official
 ```
@@ -394,31 +421,65 @@ The plugin also includes additional skills for debugging, TDD, code review, and 
 - Any task that would take more than 30 minutes
 - When you want Claude to work autonomously without going off-track
 
-**Example:**
-```
-You:    I want to add a gene expression visualization feature to the gene page.
-Claude: [Enters brainstorming mode, asks about data sources, chart types,
-        user interactions, performance requirements...]
-
-        Ready to write a plan?
-You:    Yes.
-Claude: [Writes detailed plan to docs/plans/gene-expression-viz.md]
-
-        Ready to execute?
-You:    Go.
-Claude: [Works through tasks autonomously, reviewing each one...]
-```
-
 For more details, see the [Superpowers GitHub repository](https://github.com/obra/superpowers).
 
 ---
 
-### More Tips Coming Soon
+### Frontend Design with Claude
 
-- Working with Alliance APIs (AGR APIs, JBrowse, etc.)
-- Code review workflows
-- Debugging strategies
-- Recommended settings and CLAUDE.md templates
+Claude Code includes a built-in **frontend-design** skill that creates distinctive, production-grade frontend interfaces. Use this when building web components, pages, or applications that need polished visual design.
+
+**Installation:** None required - this skill is built into Claude Code.
+
+**Usage:**
+
+Run the skill directly:
+```
+/frontend-design
+```
+
+Or ask Claude to use it when building UI:
+```
+> Build a dashboard component for displaying gene expression data. Use frontend-design for this.
+> Create a search results page with filtering. Please use the frontend-design skill.
+```
+
+The skill generates creative, polished code that avoids generic AI aesthetics.
+
+**Best for:**
+- Building new UI components or pages
+- Creating landing pages or marketing sites
+- Any frontend work where design quality matters
+
+---
+
+### Alliance Agents Plugin
+
+For advanced workflows, the Alliance Agents plugin provides specialized agents for specific tasks.
+
+**Installation:**
+```
+/plugin install alliance-agents@alliance-plugins
+```
+
+**Available agents:**
+
+| Agent | What it does |
+|-------|--------------|
+| `mcp-architect` | Designs and implements MCP servers that connect Claude to external APIs. Use when you need to give Claude access to a new data source or service. |
+| `product-manager` | Creates comprehensive Product Requirements Documents (PRDs) from high-level feature requests. Produces executive-ready specs with metrics, requirements, and rollout plans. |
+
+**When to use:**
+- **mcp-architect**: You want Claude to query your internal database, connect to a third-party API, or build any MCP integration
+- **product-manager**: You need to turn a vague feature idea into a structured PRD before implementation
+
+**Usage:**
+
+Ask Claude to spawn a subagent for the task:
+```
+> Please spawn a subagent to create a PRD for adding user authentication to the curation tool.
+> Spawn a subagent to design an MCP server that connects to our internal strain database.
+```
 
 ---
 
