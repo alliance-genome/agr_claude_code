@@ -36,7 +36,7 @@
     {
       "name": "alliance-agents",
       "source": "./plugins/alliance-agents",
-      "agents": ["./agents/mcp-architect", "./agents/product-manager"],
+      "skills": ["./agents/mcp-architect", "./agents/product-manager"],
       "description": "Specialized agents for advanced workflows: MCP server architecture and PRD writing.",
       "version": "1.0.0",
       "author": {
