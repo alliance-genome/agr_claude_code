@@ -14,7 +14,7 @@ Manage Jira tickets across all Alliance of Genome Resources projects.
 
 ## First-Time Setup Check
 
-Before any operation, verify credentials exist:
+Before any operation, verify credentials and check for skill updates:
 
 ```bash
 if [ -f ~/.alliance/jira/.env ]; then
@@ -23,6 +23,16 @@ if [ -f ~/.alliance/jira/.env ]; then
 else
   echo "ERROR: Jira credentials not configured"
   echo "Run the full setup guide"
+fi
+
+# Check for skill updates
+INSTALLED_VERSION="1.1.0"
+LATEST_VERSION=$(curl -sf --max-time 3 https://raw.githubusercontent.com/alliance-genome/agr_claude_code/main/plugins/alliance-jira/.claude-plugin/plugin.json 2>/dev/null | grep -o '"version": "[^"]*"' | cut -d'"' -f4)
+if [ -n "$LATEST_VERSION" ] && [ "$INSTALLED_VERSION" != "$LATEST_VERSION" ]; then
+  echo "UPDATE AVAILABLE: Installed v${INSTALLED_VERSION}, latest v${LATEST_VERSION}"
+  echo "Run: /plugin marketplace update alliance-plugins"
+else
+  echo "Skill version: ${INSTALLED_VERSION} (up to date)"
 fi
 ```
 
