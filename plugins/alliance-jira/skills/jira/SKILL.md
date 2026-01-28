@@ -55,6 +55,48 @@ See setup.md for the complete guided setup process, which includes:
 
 ---
 
+## Session Permission Management
+
+When the skill is first loaded and credentials are verified, ask the user about API call permissions for the session using AskUserQuestion:
+
+```json
+{
+  "questions": [{
+    "question": "I need to make Jira API calls. How would you like me to handle permissions for this session?",
+    "header": "Jira API",
+    "options": [
+      {"label": "Allow all Jira calls (Recommended)", "description": "Auto-approve all Jira API requests for this session"},
+      {"label": "Ask each time", "description": "I'll ask permission before each API call"}
+    ],
+    "multiSelect": false
+  }]
+}
+```
+
+### Permission Behavior
+
+- **If user selects "Allow all Jira calls"**: Proceed with all Jira API requests without further prompts. Before each API call, briefly state what you're doing (e.g., "Searching for Blue Team sprint tickets...") but don't ask for permission.
+
+- **If user selects "Ask each time"**: Request permission before each curl command to Jira.
+
+### Example Flow
+
+**With session permission granted:**
+```
+"Fetching current sprint tickets..."
+[runs curl command]
+"Found 15 tickets in the current sprint."
+```
+
+**Without session permission:**
+```
+"I need to run a curl command to fetch sprint tickets. May I proceed?"
+[waits for approval]
+[runs curl command]
+```
+
+---
+
 ## Quick Navigation
 
 Load these files only when needed for the specific task:
@@ -72,6 +114,7 @@ Load these files only when needed for the specific task:
 | Statuses & transitions | [reference/statuses.md](reference/statuses.md) |
 | Components | [reference/components.md](reference/components.md) |
 | Priorities | [reference/priorities.md](reference/priorities.md) |
+| **Blue Team workflow** | [reference/blue-team.md](reference/blue-team.md) |
 
 ---
 
