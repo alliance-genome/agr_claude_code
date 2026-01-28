@@ -1,110 +1,26 @@
-name: Claude Code
+name: Claude Code Review
 
 on:
+  pull_request:
+    types: [opened, synchronize, reopened]
   issue_comment:
     types: [created]
-  pull_request_review_comment:
-    types: [created]
-  pull_request:
-    types: [opened, synchronize]
-  issues:
-    types: [opened, assigned]
-  pull_request_review:
-    types: [submitted]
 
 jobs:
-  claude:
+  claude-review:
     if: |
-      (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude')) ||
-      (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude')) ||
-      (github.event_name == 'pull_request_review' && contains(github.event.review.body, '@claude')) ||
-      (github.event_name == 'issues' && (contains(github.event.issue.body, '@claude') || contains(github.event.issue.title, '@claude')))
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      pull-requests: write
-      issues: write
-      id-token: write
-      actions: read
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
-        with:
-          fetch-depth: 1
-
-      - name: Run Claude Code
-        id: claude
-        uses: anthropics/claude-code-action@v1
-        with:
-          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-
-  pr-review:
-    if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
+      (github.event_name == 'pull_request' && github.event.action == 'opened') ||
+      (github.event_name == 'issue_comment' && github.event.issue.pull_request)
     permissions:
       contents: read
       pull-requests: write
       issues: write
       id-token: write
-      actions: read
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-
-      - name: Download reference documentation
-        run: |
-          mkdir -p .review-docs
-          curl -sL https://code.claude.com/docs/en/plugin-marketplaces -o .review-docs/plugin-marketplaces.html
-          curl -sL https://code.claude.com/docs/en/plugins -o .review-docs/plugins.html
-          curl -sL https://code.claude.com/docs/en/skills -o .review-docs/skills.html
-
-      - name: Run PR Review
-        uses: anthropics/claude-code-action@v1
-        with:
-          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          prompt: |
-            You are reviewing a pull request for the Alliance of Genome Resources Claude Code plugin marketplace repository.
-
-            ## Reference Documentation
-
-            Before reviewing, read these three reference documents that were downloaded to .review-docs/:
-            - .review-docs/plugin-marketplaces.html - Official marketplace documentation
-            - .review-docs/plugins.html - Official plugin documentation
-            - .review-docs/skills.html - Official skills documentation
-
-            Use these as the source of truth for best practices around plugin structure, skill format, and marketplace configuration.
-
-            ## Review Checklist
-
-            ### 1. Best Practices Compliance
-            Compare the PR changes against the reference documentation:
-            - Plugin structure follows the official format (plugin.json manifest, correct directory layout)
-            - Skills use proper YAML frontmatter format
-            - Marketplace entries have required fields
-            - Any new plugins or skills follow documented conventions
-
-            ### 2. Version Consistency (CRITICAL)
-            This is the most important check. Examine ALL version numbers:
-
-            a) Read .claude-plugin/marketplace.json and every plugins/*/. claude-plugin/plugin.json
-            b) If any plugin's plugin.json version was changed in this PR, the corresponding entry in marketplace.json MUST be updated to match
-            c) The marketplace.json version for each plugin MUST equal the version in that plugin's plugin.json
-            d) If a plugin's skills or agents were modified, the plugin version MUST be incremented
-
-            Report any version mismatches as a blocking issue.
-
-            ### 3. General Code Review
-            - Documentation is clear and accurate
-            - No secrets or credentials in committed files
-            - Changes are consistent with the repository's existing patterns
-            - CLAUDE.md is not accidentally deleted or modified without good reason
-
-            ## Output Format
-
-            Provide your review as a structured comment with:
-            - A summary of what the PR does
-            - Version check results (pass/fail with details)
-            - Best practices compliance (any issues found)
-            - General observations or suggestions
+    uses: alliance-genome/.github/.github/workflows/claude-code-review.yml@main
+    with:
+      model: claude-sonnet-4-20250514
+      max_turns: "30"
+      review_focus: "plugin marketplace structure, version consistency between marketplace.json and plugin.json files, YAML frontmatter in skills, and compliance with Claude Code plugin conventions. CRITICAL: Check that every plugin version in .claude-plugin/marketplace.json matches the version in the corresponding plugins/*/.claude-plugin/plugin.json. If a plugin's skills or agents were modified, its version MUST be incremented. Report any version mismatches as a blocking issue."
+      trigger_phrase: "@claude"
+    secrets:
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
