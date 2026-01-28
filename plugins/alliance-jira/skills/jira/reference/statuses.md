@@ -44,6 +44,24 @@
 | PO Review | 10312 | In Progress |
 | Done | 10305 | Done |
 
+**Note:** For team-specific workflow conventions, see [blue-team.md](blue-team.md).
+
+---
+
+## SCRUM Transition IDs
+
+| To Move To | Transition ID |
+|------------|---------------|
+| **To Do** | 11 |
+| **Ready for Work** | 91 |
+| **In Progress** | 21 |
+| **Ready for UAT** | 51 |
+| **Ready for Prod** | 61 |
+| **PO Review** | 41 |
+| **Done** | 31 |
+
+**Note:** Done transition (31) has a screen - may prompt for resolution.
+
 ---
 
 ## Status Categories
