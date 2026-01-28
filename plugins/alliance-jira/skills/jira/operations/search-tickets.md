@@ -2,7 +2,7 @@
 
 ## Overview
 
-Use JQL (Jira Query Language) to search for issues. The enhanced search endpoint (`/rest/api/3/search/jql`) is recommended over the deprecated `/rest/api/3/search`.
+Use JQL (Jira Query Language) to search for issues via the `/rest/api/3/search/jql` endpoint (GET or POST).
 
 ---
 
@@ -188,20 +188,34 @@ Response: `{"count": 42}`
 
 ---
 
-## Board-Based Queries
+## Component and Project Queries
 
-For board-specific listings, use the Agile API:
+Use JQL to filter by component (which maps to board views):
 
 ```bash
-# Get issues on Main Board (ID: 61)
-curl -s -u "${JIRA_EMAIL}:${JIRA_API_KEY}" \
-  "https://agr-jira.atlassian.net/rest/agile/1.0/board/61/issue?maxResults=50" \
-  -H "Accept: application/json"
+# Get AI Curation issues (mirrors AI Curation board, ID: 169)
+source ~/.alliance/jira/.env
+curl -s -X POST -u "${JIRA_EMAIL}:${JIRA_API_KEY}" \
+  "https://agr-jira.atlassian.net/rest/api/3/search/jql" \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "jql": "project = KANBAN AND component = \"AI Curation\" ORDER BY updated DESC",
+    "maxResults": 50,
+    "fields": ["key", "summary", "status", "assignee", "priority"]
+  }'
 
-# With JQL filter
-curl -s -u "${JIRA_EMAIL}:${JIRA_API_KEY}" \
-  "https://agr-jira.atlassian.net/rest/agile/1.0/board/61/issue?jql=status='In Progress'" \
-  -H "Accept: application/json"
+# With status filter
+source ~/.alliance/jira/.env
+curl -s -X POST -u "${JIRA_EMAIL}:${JIRA_API_KEY}" \
+  "https://agr-jira.atlassian.net/rest/api/3/search/jql" \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "jql": "project = KANBAN AND component = \"AI Curation\" AND status = \"In Progress\" ORDER BY updated DESC",
+    "maxResults": 50,
+    "fields": ["key", "summary", "status", "assignee", "priority"]
+  }'
 ```
 
 ---

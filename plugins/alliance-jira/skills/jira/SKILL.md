@@ -8,6 +8,10 @@ argument-hint: [ticket-key or search query]
 
 Manage Jira tickets across all Alliance of Genome Resources projects.
 
+> **CRITICAL: DO NOT pipe curl output to python3, jq, or any other process.**
+> Piping causes intermittent empty-stdin failures that silently break JSON parsing.
+> Always run curl commands standalone and read the raw JSON output directly.
+
 ## First-Time Setup Check
 
 Before any operation, verify credentials exist:
@@ -62,6 +66,7 @@ Load these files only when needed for the specific task:
 2. **Exception: AGRHELP tickets** - can close/comment on any AGRHELP ticket
 3. **NEVER expose API credentials** in output
 4. **Always GET ticket first** before any modification to verify ownership
+5. **NEVER pipe curl output through python3** - this causes intermittent empty-stdin failures. Read raw JSON output from curl directly. You can parse JSON without python.
 
 ---
 
@@ -79,7 +84,7 @@ Load these files only when needed for the specific task:
 | Update issue | `/rest/api/3/issue/{key}` | PUT |
 | Transition issue | `/rest/api/3/issue/{key}/transitions` | POST |
 | Add comment | `/rest/api/3/issue/{key}/comment` | POST |
-| Board issues | `/rest/agile/1.0/board/{id}/issue` | GET |
+| Board issues (via JQL) | `/rest/api/3/search/jql` | GET/POST |
 
 ### Authentication
 
@@ -114,12 +119,18 @@ curl -s -u "${JIRA_EMAIL}:${JIRA_API_KEY}" \
   -H "Accept: application/json"
 ```
 
-### List Tickets on Board
+### List Tickets by Component
 ```bash
 source ~/.alliance/jira/.env
-curl -s -u "${JIRA_EMAIL}:${JIRA_API_KEY}" \
-  "https://agr-jira.atlassian.net/rest/agile/1.0/board/61/issue?maxResults=20" \
-  -H "Accept: application/json"
+curl -s -X POST -u "${JIRA_EMAIL}:${JIRA_API_KEY}" \
+  "https://agr-jira.atlassian.net/rest/api/3/search/jql" \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "jql": "project = KANBAN AND component = \"AI Curation\" ORDER BY updated DESC",
+    "maxResults": 20,
+    "fields": ["key", "summary", "status", "assignee", "priority"]
+  }'
 ```
 
 ### Change Status (e.g., to "In Progress")
@@ -204,10 +215,9 @@ See operations/create-tickets.md for full ADF examples.
 
 | Mistake | Fix |
 |---------|-----|
-| Using deprecated `/rest/api/3/search` | Use POST `/rest/api/3/search/jql` instead |
+| Piping curl output to `python3` for JSON parsing | **NEVER do this** - causes intermittent empty-stdin failures. Read raw curl JSON output directly. |
 | Plain text in description/comment fields | Use Atlassian Document Format (ADF) - see above |
 | Transitioning to Done without resolution | Include `"fields": {"resolution": {"name": "Done"}}` |
 | Modifying tickets not assigned to you | Always GET ticket first to verify assignee |
 | Pasting API token in chat | Edit `~/.alliance/jira/.env` directly |
 | Missing `X-Atlassian-Token` on attachments | Add header: `X-Atlassian-Token: no-check` |
-| Using GET for JQL search | JQL search requires POST method |
