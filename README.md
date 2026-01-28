@@ -500,12 +500,21 @@ We welcome contributions from Alliance developers! Here's how to get involved:
 2. Add your plugin to `.claude-plugin/marketplace.json`
 3. Submit a pull request
 
+### Version Bumps
+
+When updating a plugin, you **must** bump the version number in both places:
+
+1. **`plugins/<plugin-name>/.claude-plugin/plugin.json`** — the plugin manifest
+2. **`.claude-plugin/marketplace.json`** — the marketplace registry entry
+
+Both must match. The version check in SKILL.md reads the installed version automatically from the plugin cache directory, so no manual update is needed there.
+
 ### Plugin Structure
 
 ```
 plugins/your-plugin/
 ├── .claude-plugin/
-│   └── plugin.json          # Plugin manifest
+│   └── plugin.json          # Plugin manifest (bump version here)
 └── skills/
     └── your-skill/
         └── SKILL.md          # Skill instructions
