@@ -26,7 +26,7 @@ else
 fi
 
 # Check for skill updates
-INSTALLED_VERSION=$(ls ~/.claude/plugins/cache/alliance-plugins/alliance-jira/ 2>/dev/null | head -1)
+INSTALLED_VERSION=$(ls ~/.claude/plugins/cache/alliance-plugins/alliance-jira/ 2>/dev/null | sort -V | tail -1)
 LATEST_VERSION=$(curl -sf --max-time 3 https://raw.githubusercontent.com/alliance-genome/agr_claude_code/main/plugins/alliance-jira/.claude-plugin/plugin.json 2>/dev/null | grep -o '"version": "[^"]*"' | cut -d'"' -f4)
 if [ -z "$LATEST_VERSION" ]; then
   echo "Skill version: ${INSTALLED_VERSION} (could not check for updates)"
