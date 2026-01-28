@@ -70,25 +70,18 @@ curl -s -u "${JIRA_EMAIL}:${JIRA_API_KEY}" \
   -H "Accept: application/json"
 ```
 
-### Get Issues on a Board
+### Get Issues by Component (replaces board queries)
 ```bash
-curl -s -u "${JIRA_EMAIL}:${JIRA_API_KEY}" \
-  "https://agr-jira.atlassian.net/rest/agile/1.0/board/{boardId}/issue?maxResults=50" \
-  -H "Accept: application/json"
-```
-
-### Get Board Configuration
-```bash
-curl -s -u "${JIRA_EMAIL}:${JIRA_API_KEY}" \
-  "https://agr-jira.atlassian.net/rest/agile/1.0/board/{boardId}/configuration" \
-  -H "Accept: application/json"
-```
-
-### Get Active Sprints (Scrum boards only)
-```bash
-curl -s -u "${JIRA_EMAIL}:${JIRA_API_KEY}" \
-  "https://agr-jira.atlassian.net/rest/agile/1.0/board/{boardId}/sprint?state=active" \
-  -H "Accept: application/json"
+# Use JQL with component filter to get board-equivalent results
+curl -s -X POST -u "${JIRA_EMAIL}:${JIRA_API_KEY}" \
+  "https://agr-jira.atlassian.net/rest/api/3/search/jql" \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "jql": "project = KANBAN AND component = \"AI Curation\" ORDER BY updated DESC",
+    "maxResults": 50,
+    "fields": ["key", "summary", "status", "assignee", "priority"]
+  }'
 ```
 
 ---
