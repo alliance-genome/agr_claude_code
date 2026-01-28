@@ -12,9 +12,11 @@ Manage Jira tickets across all Alliance of Genome Resources projects.
 > Piping causes intermittent empty-stdin failures that silently break JSON parsing.
 > Always run curl commands standalone and read the raw JSON output directly.
 
-## First-Time Setup Check
+## MANDATORY: Credentials & Version Check (Run on Skill Load)
 
-Before any operation, verify credentials and check for skill updates:
+> **CRITICAL: You MUST run this bash block when the skill is first loaded, before doing anything else.**
+> This is NOT optional. Always run it as the very first step when this skill initializes.
+> Do not skip it or jump straight to Jira operations.
 
 ```bash
 if [ -f ~/.alliance/jira/.env ]; then
