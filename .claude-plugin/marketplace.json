@@ -14,7 +14,7 @@
       "source": "./plugins/alliance-jira",
       "skills": ["./skills/jira"],
       "description": "Comprehensive Jira management for Alliance projects (KANBAN, SCRUM, AGRHELP, MOD). Create tickets, search issues, manage status transitions, and more.",
-      "version": "1.1.0",
+      "version": "1.1.1",
       "author": {
         "name": "Christopher Tabone",
         "email": "christopher.tabone@jax.org"
