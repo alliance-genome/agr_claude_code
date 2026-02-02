@@ -80,6 +80,8 @@ irm https://claude.ai/install.ps1 | iex
 brew install --cask claude-code
 ```
 
+> **One-time installation:** Claude Code only needs to be installed once per computer. After installation, you can run `claude` from any directory - you don't need to install it separately for each project or repository.
+
 > Note: Native installations auto-update automatically. Homebrew requires manual updates via `brew upgrade claude-code`.
 
 ### Step 4: Log In and Start Using Claude Code
@@ -89,7 +91,9 @@ brew install --cask claude-code
    ```bash
    claude
    ```
-3. **Log in** when prompted - use the email you provided in Step 1
+3. **Log in** when prompted:
+   - Use the email you provided in Step 1
+   - **Important:** When asked to choose an account type, select the **second option**: **"Anthropic Console Account"** (API Usage Billing). Don't select the first option (Claude Pro/Max subscription).
 4. **Start coding!** Try asking:
    ```
    > what does this project do?
