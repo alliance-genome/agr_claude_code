@@ -8,6 +8,25 @@ argument-hint: [repo-path]
 
 Installs git pre-commit hooks that scan for secrets before each commit.
 
+## MANDATORY: Version Check (Run on Skill Load)
+
+> **CRITICAL: You MUST run this bash block when the skill is first loaded, before doing anything else.**
+
+```bash
+# Check for skill updates
+PLUGIN_JSON=$(ls -t ~/.claude/plugins/cache/alliance-plugins/git-safety/*/.claude-plugin/plugin.json 2>/dev/null | head -1)
+INSTALLED_VERSION=$(grep -o '"version": "[^"]*"' "$PLUGIN_JSON" 2>/dev/null | cut -d'"' -f4)
+LATEST_VERSION=$(curl -sf --max-time 3 https://raw.githubusercontent.com/alliance-genome/agr_claude_code/main/plugins/git-safety/.claude-plugin/plugin.json 2>/dev/null | grep -o '"version": "[^"]*"' | cut -d'"' -f4)
+if [ -z "$LATEST_VERSION" ]; then
+  echo "Skill version: ${INSTALLED_VERSION} (could not check for updates)"
+elif [ "$INSTALLED_VERSION" != "$LATEST_VERSION" ]; then
+  echo "*** UPDATE AVAILABLE *** Installed v${INSTALLED_VERSION}, latest v${LATEST_VERSION}"
+  echo "Run: /plugin marketplace update alliance-plugins"
+else
+  echo "Skill version: ${INSTALLED_VERSION} (up to date)"
+fi
+```
+
 ## Step 1: Check/Install Tools
 
 First, check if the required tools are installed:

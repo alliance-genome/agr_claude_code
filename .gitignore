@@ -3,3 +3,4 @@ discovery/
 
 # Claude Code local settings
 .claude/
+.collab/

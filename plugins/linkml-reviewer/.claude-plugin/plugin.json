@@ -1,0 +1,11 @@
+{
+  "name": "linkml-reviewer",
+  "description": "Expert LinkML schema reviewer for Alliance of Genome Resources. Reviews schema changes for correctness, consistency, and adherence to Alliance conventions.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Christopher Tabone",
+    "email": "christopher.tabone@jax.org"
+  },
+  "homepage": "https://github.com/alliance-genome/agr_claude_code",
+  "keywords": ["linkml", "schema", "review", "curation", "alliance", "agr_curation_schema", "yaml"]
+}

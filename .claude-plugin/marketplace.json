@@ -26,7 +26,7 @@
       "source": "./plugins/git-safety",
       "skills": ["./skills/secure-repo"],
       "description": "Secret scanning pre-commit hooks using Gitleaks and TruffleHog. Blocks commits containing API keys, passwords, and tokens.",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "author": {
         "name": "Christopher Tabone",
         "email": "christopher.tabone@jax.org"
@@ -44,6 +44,18 @@
         "email": "paulo.nuin@gmail.com"
       },
       "keywords": ["agents", "mcp", "product-manager", "prd", "architecture", "advanced"]
+    },
+    {
+      "name": "linkml-reviewer",
+      "source": "./plugins/linkml-reviewer",
+      "skills": ["./skills/linkml-review"],
+      "description": "Expert LinkML schema reviewer for Alliance of Genome Resources. Reviews schema changes for correctness, consistency, and adherence to Alliance conventions.",
+      "version": "1.0.0",
+      "author": {
+        "name": "Christopher Tabone",
+        "email": "christopher.tabone@jax.org"
+      },
+      "keywords": ["linkml", "schema", "review", "curation", "alliance", "agr_curation_schema", "yaml"]
     }
   ]
 }
