@@ -212,6 +212,7 @@ These are plugins built specifically for Alliance developers.
 /plugin marketplace add alliance-genome/agr_claude_code
 /plugin install alliance-jira@alliance-plugins
 /plugin install git-safety@alliance-plugins
+/plugin install linkml-reviewer@alliance-plugins
 ```
 
 **alliance-jira**: Manages Jira tickets across Alliance projects (KANBAN, SCRUM, AGRHELP, MOD). On first use, it will guide you through setting up your Jira API credentials (you'll need a Jira API token from your Atlassian account).
@@ -223,6 +224,13 @@ Example requests:
 - "Move SCRUM-1234 to In Progress."
 
 **git-safety**: Installs git pre-commit hooks that scan for secrets before each commit using [Gitleaks](https://github.com/gitleaks/gitleaks) and [TruffleHog](https://github.com/trufflesecurity/trufflehog). If you accidentally try to commit an API key or password, the commit is blocked. Run `/secure-repo` to set it up on any repository.
+
+**linkml-reviewer**: Expert schema reviewer for the Alliance LinkML curation schema (`agr_curation_schema`). Reviews new or modified schema files for correctness, consistency, and adherence to Alliance conventions. Includes a full reviewer checklist, convention severity levels (ENFORCED/ADVISORY/TECH-DEBT), DTO suffix mappings, and reference data for the complete class hierarchy and import graph. Use `/linkml-review` when reviewing schema PRs or proposing changes.
+
+Example requests:
+- "Review the changes I made to allele.yaml"
+- "I'm adding a new ExpressionPattern class - check it follows Alliance conventions"
+- "Does this new DTO slot use the correct suffix convention?"
 
 ---
 
