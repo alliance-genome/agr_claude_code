@@ -8,47 +8,72 @@ Mermaid diagram of all import relationships between schema files in `agr_curatio
 
 ```mermaid
 graph TD
-  affectedGenomicModel --> core
   affectedGenomicModel --> allele
-  agent --> core
+  affectedGenomicModel --> core
   agent --> allianceMember
+  agent --> core
   agent --> resourceDescriptor
   allele --> affectedGenomicModel
   allele --> agent
-  allele --> core
-  allele --> image
   allele --> controlledVocabulary
+  allele --> core
   allele --> gene
-  allele --> variation
+  allele --> image
   allele --> ontologyTerm
   allele --> phenotypeAndDiseaseAnnotation
   allele --> reagent
-  allianceMember --> core
+  allele --> variation
   allianceMember --> agent
+  allianceMember --> core
   allianceMember --> reference
+  allianceModel --> affectedGenomicModel
+  allianceModel --> agent
+  allianceModel --> allele
+  allianceModel --> allianceMember
+  allianceModel --> biologicalEntitySet
+  allianceModel --> bulkload
+  allianceModel --> controlledVocabulary
+  allianceModel --> core
+  allianceModel --> curationReport
+  allianceModel --> expression
+  allianceModel --> gene
+  allianceModel --> geneInteraction
+  allianceModel --> highThroughputExpression
+  allianceModel --> homology
+  allianceModel --> image
+  allianceModel --> ingest
+  allianceModel --> modCorpusAssociation
+  allianceModel --> ontologyTerm
+  allianceModel --> phenotypeAndDiseaseAnnotation
+  allianceModel --> reagent
+  allianceModel --> reference
+  allianceModel --> resource
+  allianceModel --> variantConsequence
+  allianceModel --> variantDTO
+  allianceModel --> variation
   biologicalEntitySet --> core
   biologicalEntitySet --> gene
   bulkload --> core
   bulkload --> ingest
   controlledVocabulary --> core
   controlledVocabulary --> ontologyTerm
-  core --> reference
-  core --> resource
+  core --> affectedGenomicModel
   core --> agent
+  core --> controlledVocabulary
   core --> image
   core --> ontologyTerm
-  core --> controlledVocabulary
+  core --> reference
+  core --> resource
   core --> resourceDescriptor
-  core --> affectedGenomicModel
   curationReport --> core
   expression --> affectedGenomicModel
   expression --> allele
-  expression --> reagent
   expression --> core
   expression --> gene
   expression --> image
   expression --> ontologyTerm
   expression --> phenotypeAndDiseaseAnnotation
+  expression --> reagent
   expression --> reference
   gene --> core
   gene --> ontologyTerm
@@ -56,48 +81,48 @@ graph TD
   geneInteraction --> core
   geneInteraction --> gene
   geneInteraction --> reference
+  highThroughputExpression --> affectedGenomicModel
+  highThroughputExpression --> allele
   highThroughputExpression --> core
   highThroughputExpression --> expression
-  highThroughputExpression --> allele
-  highThroughputExpression --> affectedGenomicModel
   homology --> core
   homology --> gene
-  image --> core
   image --> allele
-  ingest --> core
-  ingest --> reagent
+  image --> core
+  ingest --> affectedGenomicModel
   ingest --> allele
+  ingest --> core
   ingest --> gene
   ingest --> image
-  ingest --> variation
   ingest --> ontologyTerm
-  ingest --> affectedGenomicModel
   ingest --> phenotypeAndDiseaseAnnotation
+  ingest --> reagent
   ingest --> variantDTO
-  modCorpusAssociation --> core
+  ingest --> variation
   modCorpusAssociation --> allianceMember
+  modCorpusAssociation --> core
   modCorpusAssociation --> reference
-  ontologyTerm --> core
   ontologyTerm --> allele
-  phenotypeAndDiseaseAnnotation --> reference
+  ontologyTerm --> core
+  phenotypeAndDiseaseAnnotation --> allele
   phenotypeAndDiseaseAnnotation --> core
   phenotypeAndDiseaseAnnotation --> gene
-  phenotypeAndDiseaseAnnotation --> allele
   phenotypeAndDiseaseAnnotation --> ontologyTerm
+  phenotypeAndDiseaseAnnotation --> reference
   reagent --> core
   reagent --> gene
   reagent --> reference
   reference --> core
   resource --> core
-  resourceDescriptor --> core
   resourceDescriptor --> affectedGenomicModel
+  resourceDescriptor --> core
   variantConsequence --> core
   variantConsequence --> variation
+  variantDTO --> allele
   variantDTO --> core
   variantDTO --> variation
-  variantDTO --> allele
-  variation --> core
   variation --> allele
+  variation --> core
   variation --> ontologyTerm
   variation --> variantConsequence
 ```

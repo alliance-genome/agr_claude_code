@@ -2,7 +2,7 @@
 
 File inventory for `agr_curation_schema/model/schema/` with class, slot, and enum counts per file.
 
-**Total**: 27 files, 358 classes, 13 enums, ~12,118 lines
+**Total**: 27 files, 360 classes, 13 enums, ~12,220 lines
 
 | File | Classes | Slots | Enums | Domain |
 |------|--------:|------:|------:|--------|
@@ -11,7 +11,7 @@ File inventory for `agr_curation_schema/model/schema/` with class, slot, and enu
 | allele.yaml | 51 | 74 | 0 | Alleles |
 | allianceMember.yaml | 1 | 1 | 0 | Alliance members |
 | allianceModel.yaml | 0 | 0 | 0 | Root aggregator |
-| biologicalEntitySet.yaml | 9 | 10 | 0 | Entity sets |
+| biologicalEntitySet.yaml | 11 | 20 | 0 | Entity sets |
 | bulkload.yaml | 8 | 27 | 4 | Bulk loading |
 | controlledVocabulary.yaml | 3 | 5 | 0 | Vocabularies |
 | core.yaml | 56 | 127 | 1 | Foundation |
@@ -38,19 +38,19 @@ File inventory for `agr_curation_schema/model/schema/` with class, slot, and enu
 
 | Enum Name | File | Values |
 |-----------|------|-------:|
-| strand_enum | core.yaml | 4 |
 | subtype_values | affectedGenomicModel.yaml | 3 |
+| backend_bulk_data_type_enum | bulkload.yaml | 7 |
+| backend_bulk_load_type_enum | bulkload.yaml | 10 |
+| bulk_load_status_enum | bulkload.yaml | 10 |
+| ontology_bulk_load_type_enum | bulkload.yaml | 13 |
+| strand_enum | core.yaml | 4 |
+| high_throughput_expression_assay_values | highThroughputExpression.yaml | 8 |
+| sample_type_values | highThroughputExpression.yaml | 8 |
+| sequencing_format_values | highThroughputExpression.yaml | 2 |
+| mod_corpus_sort_source_enum | modCorpusAssociation.yaml | 4 |
 | pubmed_publication_status_enum | reference.yaml | 3 |
 | pubmed_type_enum | reference.yaml | 79 |
 | reference_category_enum | reference.yaml | 12 |
-| sample_type_values | highThroughputExpression.yaml | 8 |
-| sequencing_format_values | highThroughputExpression.yaml | 2 |
-| high_throughput_expression_assay_values | highThroughputExpression.yaml | 8 |
-| bulk_load_status_enum | bulkload.yaml | 10 |
-| backend_bulk_load_type_enum | bulkload.yaml | 10 |
-| ontology_bulk_load_type_enum | bulkload.yaml | 13 |
-| backend_bulk_data_type_enum | bulkload.yaml | 7 |
-| mod_corpus_sort_source_enum | modCorpusAssociation.yaml | 4 |
 
 ## Key Files
 
