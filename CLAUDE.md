@@ -30,6 +30,18 @@ plugins/
 
 ## Plugin Development
 
+### Version Bumping (MANDATORY)
+
+> **CRITICAL: When you modify ANY file inside a plugin directory (`plugins/<name>/`),
+> you MUST bump that plugin's version in BOTH places:**
+>
+> 1. `plugins/<name>/.claude-plugin/plugin.json` — the `"version"` field
+> 2. `.claude-plugin/marketplace.json` — the matching plugin entry's `"version"` field
+>
+> **Both versions MUST match.** Use semver: patch for fixes, minor for new features/rules,
+> major for breaking changes. If you forget this, users won't see the update when they
+> run `/plugin marketplace update alliance-plugins`.
+
 ### Creating a New Plugin
 
 1. Create directory under `plugins/<plugin-name>/`

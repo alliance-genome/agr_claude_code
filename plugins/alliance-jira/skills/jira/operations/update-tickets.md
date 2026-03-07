@@ -173,6 +173,11 @@ curl -s -u "${JIRA_EMAIL}:${JIRA_API_KEY}" \
 
 ## Add Comment
 
+> **AI Attribution Required:** Every comment drafted by an AI agent MUST include
+> a subscript attribution line as the final paragraph. Use the `subsup` mark with
+> `"type": "sub"` and text like `"This comment was drafted by Claude."` (or
+> whatever agent name applies — e.g., "Codex"). See the example below.
+
 ```bash
 source ~/.alliance/jira/.env
 curl -s -X POST -u "${JIRA_EMAIL}:${JIRA_API_KEY}" \
@@ -187,6 +192,19 @@ curl -s -X POST -u "${JIRA_EMAIL}:${JIRA_API_KEY}" \
         {
           "type": "paragraph",
           "content": [{"type": "text", "text": "This is my comment."}]
+        },
+        {
+          "type": "rule"
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "This comment was drafted by Claude.",
+              "marks": [{"type": "subsup", "attrs": {"type": "sub"}}]
+            }
+          ]
         }
       ]
     }
