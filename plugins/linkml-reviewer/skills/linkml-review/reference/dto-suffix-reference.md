@@ -9,10 +9,10 @@ Complete mapping of non-DTO ranges to their DTO slot suffix conventions.
 | `_curie` | 50 | Ontology term or entity curie reference |
 | `_dto` | 29 | Single inlined DTO object |
 | `_identifier` | 27 | Entity identifier string |
-| `_dtos` | 22 | Multiple inlined DTO objects |
-| `_curies` | 13 | Multiple curie references |
-| `_identifiers` | 7 | Multiple entity identifiers |
-| `_ingest_set` | 50 | Ingest envelope array |
+| `_dtos` | 23 | Multiple inlined DTO objects |
+| `_curies` | 16 | Multiple curie references |
+| `_identifiers` | 9 | Multiple entity identifiers |
+| `_ingest_set` | 52 | Ingest envelope array |
 | `_name` | varies | VocabularyTerm name string |
 | `_names` | varies | Multiple VocabularyTerm name strings |
 
