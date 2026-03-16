@@ -91,6 +91,7 @@ graph TD
   image --> core
   ingest --> affectedGenomicModel
   ingest --> allele
+  ingest --> biologicalEntitySet
   ingest --> core
   ingest --> gene
   ingest --> image
