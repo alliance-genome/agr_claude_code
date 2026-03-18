@@ -120,10 +120,10 @@ Load these files only when needed for the specific task:
 
 ## Safety Rules
 
-1. **ONLY modify tickets assigned to the authenticated user** (verify assignee first)
-2. **Exception: AGRHELP tickets** - can close/comment on any AGRHELP ticket
+1. **Comments are allowed on any ticket the authenticated user can access.** For all other modifications (status changes, field edits, reassignment, etc.), only modify tickets assigned to the authenticated user.
+2. **Exception: AGRHELP tickets** - can close/comment on any accessible AGRHELP ticket even when assigned to someone else
 3. **NEVER expose API credentials** in output
-4. **Always GET ticket first** before any modification to verify ownership
+4. **Always GET ticket first** before any modification to verify current state and assignee. For non-comment changes outside AGRHELP, verify ownership before proceeding.
 5. **NEVER pipe curl output through python3** - this causes intermittent empty-stdin failures. Read raw JSON output from curl directly. You can parse JSON without python.
 6. **AI attribution on comments** - Every Jira comment drafted by an AI agent MUST end with a subscript attribution line: *"This comment was drafted by `<agent name>`."* (e.g., "Claude", "Codex"). Use ADF `subsup` mark with `sub` type for the attribution. This is non-negotiable — watchers and stakeholders need to know when a comment was AI-generated.
 
