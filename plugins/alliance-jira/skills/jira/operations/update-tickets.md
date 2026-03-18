@@ -177,6 +177,10 @@ curl -s -u "${JIRA_EMAIL}:${JIRA_API_KEY}" \
 > a subscript attribution line as the final paragraph. Use the `subsup` mark with
 > `"type": "sub"` and text like `"This comment was drafted by Claude."` (or
 > whatever agent name applies — e.g., "Codex"). See the example below.
+>
+> **Ownership rule:** Comments may be posted on tickets assigned to other people as
+> long as the authenticated user can access the ticket. Fetch the ticket first so
+> you can confirm the key, current state, and visibility before posting.
 
 ```bash
 source ~/.alliance/jira/.env
