@@ -2,6 +2,10 @@
 
 Shared Claude Code configurations, plugins, and best practices for Alliance of Genome Resources developers.
 
+> [!IMPORTANT]
+> **Claude Code runs in a regular terminal, not in the Claude web UI.**
+> Alliance access is for the Claude Code command-line tool only. If the Claude website or Claude desktop chat app still shows a personal `Free` plan, that is expected. To use Alliance-provided Claude Code access, open a normal terminal window on your computer (for example Terminal, iTerm, Windows Terminal, or PowerShell) and run Claude Code there.
+
 ## Table of Contents
 
 - [What is Claude Code?](#what-is-claude-code)
