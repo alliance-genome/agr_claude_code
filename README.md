@@ -116,6 +116,29 @@ Select **Opus** from the list. This setting persists across sessions.
 
 **Why Opus?** Opus is Claude's most capable model - it handles complex codebases better, makes fewer mistakes, and produces higher quality code. If you're finding Claude's suggestions unhelpful or off-target, check that you're using Opus.
 
+### Step 6: Customize Claude for Your Workflow (Especially for Curators)
+
+> [!TIP]
+> **If you're a curator and not a programmer, do this right after you install.** Claude Code is a developer tool by default, but you can teach it to behave like a curator-friendly assistant — in plain English, no coding required.
+
+**Save your preferences once, for every project on this machine.**
+
+Open Claude in any folder and tell it (you can copy-paste this and edit it to your taste):
+
+> *"Please update my global Claude memory at `~/.claude/CLAUDE.md` so that, in every future session on this machine, you remember: I'm a biological curator, not a programmer. Explain things in plain English, ask before running terminal commands, don't show raw code unless I ask, and prefer biology terminology over programming jargon."*
+
+Claude will create or edit that file for you. It is loaded automatically every time you start Claude Code on this computer, so you only have to do this once. You can come back any time and ask Claude to add, change, or remove instructions.
+
+#### About those "Do you want me to proceed?" prompts
+
+By default, Claude asks permission before editing files or running terminal commands. **This is a safety feature, not a sign that something is wrong** — Claude is checking with you before doing something it can't easily undo. You can always say no and Claude will adjust.
+
+A few things that make those prompts less frequent and less stressful:
+
+- **Pick "Yes, don't ask again"** when the prompt appears. Claude remembers that choice and won't ask about that same action again.
+- **Press `Shift+Tab`** to switch into **accept-edits mode**. Claude will auto-approve safe file reads and edits but still ask before running terminal commands. Press `Shift+Tab` again to cycle back. This is a good middle ground for most curator work.
+- **Run `/permissions`** any time to view or remove things you've previously allowed.
+
 ### Additional Resources
 
 - [CLI Reference](https://code.claude.com/docs/en/cli-reference) - All commands and options
@@ -362,25 +385,37 @@ For more details, see the [AGR MCP Server repository](https://github.com/allianc
 
 ## Tips & Best Practices
 
-### Speed Up with --dangerously-skip-permissions
+### Speed Up with Auto Mode
 
 By default, Claude Code asks for permission before running commands, editing files, or performing other actions. This is safe but can slow you down when you're in the flow.
 
-To skip all permission prompts:
+**Auto mode** lets Claude work continuously without stopping for routine confirmations, while still blocking irreversible or destructive actions through a built-in safety classifier.
 
-```bash
-claude --dangerously-skip-permissions
-```
+**How to turn it on:**
 
-**Why it's faster:** Claude can read files, make edits, run tests, and execute commands without stopping to ask "Is this okay?" after every action. For experienced users who trust Claude and understand what it's doing, this dramatically speeds up development.
+- **Press `Shift+Tab`** to cycle through permission modes until you see `auto` in the status bar (`default → acceptEdits → plan → auto`).
+- Or start Claude with the flag: `claude --permission-mode auto`
+- Or set it as your default in `~/.claude/settings.json`:
+  ```json
+  {
+    "permissions": {
+      "defaultMode": "auto"
+    }
+  }
+  ```
 
-**Why it's dangerous:** Claude will execute commands without confirmation. If Claude misunderstands your request or makes a mistake, it could delete files, overwrite code, or run unintended commands before you can stop it.
+**Why it's faster:** Claude can read files, make edits, run tests, and execute routine commands without stopping to ask "Is this okay?" after every action. This dramatically speeds up multi-step work.
+
+**Why it's safe:** Auto mode routes every action through a safety classifier that still blocks things like force pushes, mass deletions, `curl | bash`, production deploys, and changes to systems Claude doesn't recognize. Your `deny` rules and any explicit instructions you've given (e.g., *"don't push to main"*) are still respected. If the classifier blocks too many actions in a row, auto mode automatically pauses and goes back to prompting.
 
 **Recommendations:**
-- Use it in low-risk environments (feature branches, test projects, sandboxed containers)
-- Don't use it when working with production code or sensitive data
+- Use it for feature branches, test projects, and exploratory work
+- Be more cautious when working with production code or sensitive data
 - Make sure you have recent commits or backups before starting
-- Run `/secure-repo` first to install [git-safety hooks](#alliance-plugins) - this protects against accidentally committing secrets even when permissions are skipped
+- Run `/secure-repo` first to install [git-safety hooks](#alliance-plugins) - this gives you another layer of protection against accidentally committing secrets
+
+> [!NOTE]
+> Auto mode is a research preview and requires a Max, Team, Enterprise, or API plan plus a recent Claude model (Sonnet 4.6+ or Opus 4.6+). If `auto` doesn't appear when you cycle with `Shift+Tab`, your account may not be eligible yet — `acceptEdits` mode is the next-best alternative.
 
 ---
 
