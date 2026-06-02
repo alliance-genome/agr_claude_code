@@ -4,7 +4,7 @@ Generated from all classes in `agr_curation_schema/model/schema/*.yaml`. Include
 
 **6 root classes** (no in-repo parent): AuditedObject, AuditedObjectDTO, GeneOntologyAnnotationDTO, Identifier, IdentifiersRange, Ingest
 
-**Max depth**: 7 | **Abstract classes**: 38
+**Max depth**: 7 | **Abstract classes**: 40
 
 ## AuditedObject Tree
 
@@ -232,8 +232,9 @@ AuditedObject (core.yaml)
     AlleleNomenclatureEventSlotAnnotation (allele.yaml)
     CassetteComponentSlotAnnotation (reagent.yaml)
     CassetteUseSlotAnnotation (reagent.yaml)
+    ChangeEventSlotAnnotation [abstract] (core.yaml)
+      GeneChangeEventSlotAnnotation (gene.yaml)
     ConstructComponentSlotAnnotation (reagent.yaml)
-    GeneChangeEventSlotAnnotation (gene.yaml)
     NameSlotAnnotation [abstract] (core.yaml)
       AgmFullNameSlotAnnotation (affectedGenomicModel.yaml)
       AgmSymbolSlotAnnotation (affectedGenomicModel.yaml)
@@ -337,6 +338,8 @@ AuditedObjectDTO (core.yaml)
     AlleleNomenclatureEventSlotAnnotationDTO (allele.yaml)
     CassetteComponentSlotAnnotationDTO (reagent.yaml)
     CassetteUseSlotAnnotationDTO (reagent.yaml)
+    ChangeEventSlotAnnotationDTO [abstract] (core.yaml)
+      GeneChangeEventSlotAnnotationDTO (gene.yaml)
     ConstructComponentSlotAnnotationDTO (reagent.yaml)
     NameSlotAnnotationDTO (core.yaml)
       FullNameSlotAnnotationDTO (core.yaml)
