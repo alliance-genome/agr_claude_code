@@ -2,7 +2,7 @@
 
 File inventory for `agr_curation_schema/model/schema/` with class, slot, and enum counts per file.
 
-**Total**: 27 files, 365 classes, 13 enums, ~12,415 lines
+**Total**: 27 files, 365 classes, 13 enums, ~12,422 lines
 
 | File | Classes | Slots | Enums | Domain |
 |------|--------:|------:|------:|--------|
