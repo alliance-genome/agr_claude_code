@@ -2,9 +2,9 @@
 
 Mermaid diagram of all import relationships between schema files in `agr_curation_schema/model/schema/`.
 
-**Note**: A 16-file strongly connected component (SCC) exists. The import graph is intentionally interdependent, not layered/DAG-style. Reviewers must reason about cross-module implications.
+**Note**: A 17-file strongly connected component (SCC) exists. The import graph is intentionally interdependent, not layered/DAG-style. Reviewers must reason about cross-module implications.
 
-**SCC members**: affectedGenomicModel, agent, allele, allianceMember, controlledVocabulary, core, gene, image, ontologyTerm, phenotypeAndDiseaseAnnotation, reagent, reference, resource, resourceDescriptor, variantConsequence, variation
+**SCC members**: affectedGenomicModel, agent, allele, allianceMember, controlledVocabulary, core, expression, gene, image, ontologyTerm, phenotypeAndDiseaseAnnotation, reagent, reference, resource, resourceDescriptor, variantConsequence, variation
 
 ```mermaid
 graph TD
@@ -107,6 +107,7 @@ graph TD
   ontologyTerm --> core
   phenotypeAndDiseaseAnnotation --> allele
   phenotypeAndDiseaseAnnotation --> core
+  phenotypeAndDiseaseAnnotation --> expression
   phenotypeAndDiseaseAnnotation --> gene
   phenotypeAndDiseaseAnnotation --> ontologyTerm
   phenotypeAndDiseaseAnnotation --> reference

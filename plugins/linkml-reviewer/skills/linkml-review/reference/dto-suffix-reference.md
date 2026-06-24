@@ -6,8 +6,8 @@ Complete mapping of non-DTO ranges to their DTO slot suffix conventions.
 
 | Suffix | Count | Purpose |
 |--------|------:|---------|
-| `_curie` | 52 | Ontology term or entity curie reference |
-| `_dto` | 29 | Single inlined DTO object |
+| `_curie` | 54 | Ontology term or entity curie reference |
+| `_dto` | 32 | Single inlined DTO object |
 | `_identifier` | 27 | Entity identifier string |
 | `_dtos` | 24 | Multiple inlined DTO objects |
 | `_curies` | 18 | Multiple curie references |
