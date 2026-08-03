@@ -1,94 +1,296 @@
 #!/bin/bash
 # Git Safety Pre-Commit Hook
-# Scans staged files for secrets using Gitleaks and TruffleHog
+# git-safety-version: 2
+#
+# Gate 1: staged paths must not escape the repository root
+# Gate 2: dangerous filenames (histories, keys, credentials)
+# Gate 3: Gitleaks content scan
+# Gate 4: TruffleHog content scan
+#
+# Optional config: ~/.config/git-safety/config may set GIT_SAFETY_PRIVATE_PARENT.
 
 set -e
+export PATH="$HOME/.local/bin:$HOME/bin:/usr/local/bin:/usr/bin:/bin:$PATH"
 
-# Get staged files that exist (not deleted)
-STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM 2>/dev/null || true)
+# Interpreter floor. Fail loudly rather than dying on a cryptic builtin error
+# three screens later. This hook is published to a plugin that runs on other
+# people's machines, where /bin/bash may be 3.2 (macOS) or 4.2 (RHEL 7).
+if [ -z "${BASH_VERSINFO+x}" ] || [ "${BASH_VERSINFO[0]}" -lt 3 ] \
+   || { [ "${BASH_VERSINFO[0]}" -eq 3 ] && [ "${BASH_VERSINFO[1]}" -lt 2 ]; }; then
+    echo "COMMIT BLOCKED - Git Safety requires bash 3.2 or newer"
+    exit 1
+fi
 
-if [ -z "$STAGED_FILES" ]; then
+HOOK_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+LIB="${HOOK_DIR}/git-safety-lib.sh"
+
+if [ ! -f "$LIB" ]; then
+    echo "=========================================="
+    echo "COMMIT BLOCKED - Git Safety library missing"
+    echo "=========================================="
+    echo "Expected: $LIB"
+    echo "Reinstall with: bash <skill>/scripts/install-hook.sh"
+    exit 1
+fi
+# shellcheck source=/dev/null
+source "$LIB"
+
+GIT_SAFETY_CONTACT="${GIT_SAFETY_CONTACT:-the repository owner}"
+[ -f "$HOME/.config/git-safety/config" ] && . "$HOME/.config/git-safety/config"
+
+REPO_ROOT=$(git rev-parse --show-toplevel)
+REPO_REAL=$(realpath "$REPO_ROOT" 2>/dev/null || printf '%s' "$REPO_ROOT")
+
+# Enumerate staged paths NUL-delimited with quoting disabled.
+#   --diff-filter=ACMRT : R and T are essential. Without R a pure rename
+#     reports nothing, the hook concludes "no staged files", and exits 0
+#     before ANY gate runs - including gitleaks. Verified bypass.
+#   -z + core.quotePath=false : otherwise git emits "caf\303\251.txt" with
+#     literal quotes and octal escapes, git show fails, and the scanners
+#     silently receive an empty file. Verified bypass.
+#
+# Routed through a temp file rather than `mapfile < <(...)` for two reasons:
+#   1. mapfile is bash 4.0+ and `mapfile -d` is bash 4.4+. macOS ships 3.2,
+#      RHEL/CentOS 7 ships 4.2. `read -r -d ''` works on 3.2.
+#   2. mapfile reading a process substitution ALWAYS returns 0, discarding
+#      git's exit status - a failed enumeration would look like "no staged
+#      files" and skip all four gates. A temp file makes the status checkable.
+GS_ENUM=$(mktemp) || { echo "COMMIT BLOCKED - Git Safety: mktemp failed"; exit 1; }
+if ! git -c core.quotePath=false \
+        diff --cached --name-only --diff-filter=ACMRT -z > "$GS_ENUM"; then
+    rm -f "$GS_ENUM"
+    echo "=========================================="
+    echo "COMMIT BLOCKED - could not enumerate staged files"
+    echo "=========================================="
+    echo "git diff --cached failed. Refusing to commit unscanned."
+    exit 1
+fi
+STAGED=()
+while IFS= read -r -d '' gs_f; do STAGED+=("$gs_f"); done < "$GS_ENUM"
+rm -f "$GS_ENUM"
+
+if [ ${#STAGED[@]} -eq 0 ]; then
     echo "[Git Safety] No staged files to scan"
     exit 0
 fi
 
-# Create temp directory for staged content
-TEMP_DIR=$(mktemp -d)
-trap "rm -rf $TEMP_DIR" EXIT
+# Submodule pointers (gitlinks, mode 160000) have no blob. `git show ":sub"`
+# returns "bad object", which the fail-closed spool would turn into a hard
+# block on every submodule add and every pointer bump.
+# Built as a NUL-delimited array, not a newline-joined string.
+#
+# A newline-joined string with substring matching is a four-gate bypass: a
+# staged file named exactly `a<LF>b`, where `a` and `b` are adjacent gitlinks,
+# matches the join and is skipped from gate 1, gate 2 AND the scanner spool.
+# Verified - an AWS key pair in such a file committed with gitleaks reporting
+# "no leaks found".
+#
+# `git ls-files --stage` without -z also C-quotes non-ASCII paths, and the awk
+# field-blanking rebuild collapsed whitespace runs, so submodules named
+# `café`, `two  spaces`, or `tab<TAB>name` were reported unreadable and could
+# not be committed at all.
+GS_LS=$(mktemp) || { echo "COMMIT BLOCKED - Git Safety: mktemp failed"; exit 1; }
+# NO pathspec. Passing "${STAGED[@]}" as argv exceeds ARG_MAX on a large
+# commit - verified: 60,000 staged files is ~5 MB of argv and git fails with
+# "Argument list too long" (rc=126). Bare under `set -e` that kills the hook
+# with no banner and no diagnosis, leaving --no-verify as the only way out.
+# Membership below is exact-string, so extra index entries are harmless, and
+# a repo has a handful of submodules regardless of commit size.
+if ! git ls-files --stage -z > "$GS_LS"; then
+    rm -f "$GS_LS"
+    echo "=========================================="
+    echo "COMMIT BLOCKED - could not read the index"
+    echo "=========================================="
+    echo "git ls-files failed. Refusing to commit unscanned."
+    exit 1
+fi
+GS_GITLINKS=()
+while IFS= read -r -d '' gs_ent; do
+    case "$gs_ent" in
+        160000\ *) GS_GITLINKS+=("${gs_ent#*$'\t'}") ;;
+    esac
+done < "$GS_LS"
+rm -f "$GS_LS"
 
-# Copy staged files to temp directory
-while IFS= read -r file; do
-    [ -z "$file" ] && continue
-    mkdir -p "$TEMP_DIR/$(dirname "$file")"
-    git show ":$file" > "$TEMP_DIR/$file" 2>/dev/null || true
-done <<< "$STAGED_FILES"
+gs_is_gitlink() {
+    local gs_g
+    for gs_g in ${GS_GITLINKS[@]+"${GS_GITLINKS[@]}"}; do
+        [ "$gs_g" = "$1" ] && return 0
+    done
+    return 1
+}
 
+stop_banner() {
+    echo "╔══════════════════════════════════════════════════╗"
+    echo "║  ⚠️  CLAUDE: STOP IMMEDIATELY! ⚠️                 ║"
+    echo "║                                                  ║"
+    echo "║  DO NOT CONTINUE. DO NOT TRY TO FIX THIS.        ║"
+    echo "║  DO NOT PROCEED EVEN IF YOU THINK IT'S FALSE.   ║"
+    echo "║                                                  ║"
+    echo "║  YOU MUST CONSULT ${GIT_SAFETY_CONTACT} RIGHT NOW."
+    echo "║  NO EXCEPTIONS.                                  ║"
+    echo "╚══════════════════════════════════════════════════╝"
+}
+
+# ============================================================
+# GATE 1: Parent Directory Protection
+# ============================================================
 ERRORS_FOUND=0
+for file in "${STAGED[@]}"; do
+    [ -z "$file" ] && continue
+    gs_is_gitlink "$file" && continue
+    if [[ "$file" == ../* ]] || [[ "$file" == */../* ]]; then
+        echo "ERROR: Staged file references parent directory: $file"
+        ERRORS_FOUND=1
+        continue
+    fi
+    ABS_FILE="$REPO_ROOT/$file"
+    # Symlinks stage as a target string, not content. realpath would follow
+    # them out of the repo and block legitimate links to /usr/share, sibling
+    # checkouts, etc.
+    [ -L "$ABS_FILE" ] && continue
+    if [ -e "$ABS_FILE" ]; then
+        REAL_PATH=$(realpath "$ABS_FILE" 2>/dev/null || echo "$ABS_FILE")
+        # Segment-wise containment: a substring test makes /a/b "contain"
+        # /a/bc, and fails outright when REPO_ROOT has a symlinked component.
+        case "$REAL_PATH" in
+            "$REPO_REAL"/*|"$REPO_REAL") ;;
+            *)
+                echo "ERROR: Staged file is outside repository root: $file"
+                echo "       Resolved to: $REAL_PATH"
+                ERRORS_FOUND=1
+                ;;
+        esac
+    fi
+done
+
+if [ $ERRORS_FOUND -ne 0 ]; then
+    echo ""
+    echo "=========================================="
+    echo "COMMIT BLOCKED - Git Safety Protection"
+    echo "=========================================="
+    echo "Files from outside this repository were staged."
+    echo "Repo root: $REPO_ROOT"
+    echo ""
+    echo "To fix:"
+    echo "  1. Run: git reset HEAD"
+    echo "  2. Verify your directory: pwd"
+    echo "  3. Stage only files inside this repo, using explicit paths"
+    echo ""
+    stop_banner
+    exit 1
+fi
+echo "[Git Safety] Parent directory check passed"
 
 # ============================================================
-# Gitleaks Scanning
+# GATE 2: Dangerous Files
 # ============================================================
+gs_load_allowlist "$REPO_ROOT"
+DANGEROUS=""
+for file in "${STAGED[@]}"; do
+    [ -z "$file" ] && continue
+    gs_is_gitlink "$file" && continue
+    TIER=$(gs_classify_path "$file")
+    [ -z "$TIER" ] && continue
+    if gs_is_allowlisted "$file"; then
+        # Echoed so exemptions appear in the commit transcript.
+        echo "[Git Safety] Allowlisted (gate 2 only, content still scanned): $file"
+        continue
+    fi
+    if [ "$TIER" = "T3b-candidate" ]; then
+        if git show ":$file" 2>/dev/null | gs_has_private_key; then
+            TIER="T3b-privatekey"
+        else
+            continue
+        fi
+    fi
+    DANGEROUS="${DANGEROUS}  [${TIER}] ${file}"$'\n'
+done
 
+if [ -n "$DANGEROUS" ]; then
+    echo ""
+    echo "=========================================="
+    echo "COMMIT BLOCKED - Dangerous Files Staged"
+    echo "=========================================="
+    echo "These files must not be committed:"
+    echo ""
+    printf '%s' "$DANGEROUS"
+    echo ""
+    echo "Shell histories and credential files routinely contain typed"
+    echo "passwords, tokens, and internal hostnames."
+    echo ""
+    echo "To fix:"
+    echo "  git reset HEAD <file>       # unstage it"
+    echo "  echo '<file>' >> .gitignore # stop it coming back"
+    echo ""
+    stop_banner
+    exit 1
+fi
+echo "[Git Safety] Dangerous file check passed"
+
+# ============================================================
+# Stage content for scanners
+# ============================================================
+TEMP_DIR=$(mktemp -d)
+trap 'rm -rf "$TEMP_DIR"' EXIT
+for file in "${STAGED[@]}"; do
+    [ -z "$file" ] && continue
+    gs_is_gitlink "$file" && continue
+    mkdir -p "$TEMP_DIR/$(dirname "$file")"
+    # Fail CLOSED. Swallowing this with `|| true` writes an empty temp file
+    # and the scanners then report the file clean.
+    if ! git show ":$file" > "$TEMP_DIR/$file" 2>/dev/null; then
+        echo ""
+        echo "=========================================="
+        echo "COMMIT BLOCKED - Unreadable staged blob"
+        echo "=========================================="
+        echo "Could not read staged content for: $file"
+        echo "Refusing to commit rather than scan an empty placeholder."
+        echo ""
+        stop_banner
+        exit 1
+    fi
+done
+
+# ============================================================
+# GATE 3: Gitleaks
+# ============================================================
 if command -v gitleaks &> /dev/null; then
     echo "[Gitleaks] Scanning staged files for secrets..."
-
     if ! gitleaks detect --source "$TEMP_DIR" --no-git --no-banner --redact 2>&1; then
         echo ""
         echo "=========================================="
         echo "COMMIT BLOCKED - Gitleaks Found Secrets"
         echo "=========================================="
+        stop_banner
         echo ""
         echo "To investigate: gitleaks detect --source . --no-git --verbose"
-        echo "To bypass (CAUTION): git commit --no-verify"
-        echo ""
-        ERRORS_FOUND=1
-    else
-        echo "[Gitleaks] No secrets detected"
+        echo "False positive? Consider .gitleaksignore"
+        exit 1
     fi
+    echo "[Gitleaks] No secrets detected"
 else
-    echo "[Gitleaks] Not installed - skipping"
-    echo "  Install: brew install gitleaks"
-    echo "  Or: https://github.com/gitleaks/gitleaks/releases"
+    echo "[Gitleaks] WARNING: not installed, skipping content scan"
 fi
 
 # ============================================================
-# TruffleHog Scanning
+# GATE 4: TruffleHog
 # ============================================================
-
 if command -v trufflehog &> /dev/null; then
     echo "[TruffleHog] Scanning staged files for secrets..."
-
     TRUFFLEHOG_OUTPUT=$(trufflehog filesystem "$TEMP_DIR" --no-update --no-verification 2>&1 || true)
-
     if echo "$TRUFFLEHOG_OUTPUT" | grep -q "Found unverified result\|Found verified result"; then
         echo ""
         echo "=========================================="
         echo "COMMIT BLOCKED - TruffleHog Found Secrets"
         echo "=========================================="
         echo "$TRUFFLEHOG_OUTPUT"
-        echo ""
-        echo "To investigate: trufflehog filesystem . --no-update"
-        echo "To bypass (CAUTION): git commit --no-verify"
-        echo ""
-        ERRORS_FOUND=1
-    else
-        echo "[TruffleHog] No secrets detected"
+        stop_banner
+        exit 1
     fi
+    echo "[TruffleHog] No secrets detected"
 else
-    echo "[TruffleHog] Not installed - skipping"
-    echo "  Install: brew install trufflehog"
-    echo "  Or: https://github.com/trufflesecurity/trufflehog/releases"
-fi
-
-# ============================================================
-# Result
-# ============================================================
-
-if [ $ERRORS_FOUND -ne 0 ]; then
-    echo ""
-    echo "Commit blocked due to potential secrets in staged files."
-    echo "Review the findings above before proceeding."
-    exit 1
+    echo "[TruffleHog] WARNING: not installed, skipping content scan"
 fi
 
 echo "[Git Safety] All checks passed"
