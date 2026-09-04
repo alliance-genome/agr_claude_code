@@ -1,6 +1,6 @@
 #!/bin/bash
 # Git Safety Pre-Commit Hook
-# git-safety-version: 2
+# git-safety-version: 4
 #
 # Gate 1: staged paths must not escape the repository root
 # Gate 2: dangerous filenames (histories, keys, credentials)
@@ -29,13 +29,14 @@ if [ ! -f "$LIB" ]; then
     echo "COMMIT BLOCKED - Git Safety library missing"
     echo "=========================================="
     echo "Expected: $LIB"
-    echo "Reinstall with: bash <skill>/scripts/install-hook.sh"
+    echo "Reinstall the git-safety hooks with: /secure-repo"
     exit 1
 fi
 # shellcheck source=/dev/null
 source "$LIB"
 
 GIT_SAFETY_CONTACT="${GIT_SAFETY_CONTACT:-the repository owner}"
+# shellcheck source=/dev/null
 [ -f "$HOME/.config/git-safety/config" ] && . "$HOME/.config/git-safety/config"
 
 REPO_ROOT=$(git rev-parse --show-toplevel)
@@ -192,17 +193,23 @@ for file in "${STAGED[@]}"; do
     gs_is_gitlink "$file" && continue
     TIER=$(gs_classify_path "$file")
     [ -z "$TIER" ] && continue
-    if gs_is_allowlisted "$file"; then
-        # Echoed so exemptions appear in the commit transcript.
-        echo "[Git Safety] Allowlisted (gate 2 only, content still scanned): $file"
-        continue
-    fi
     if [ "$TIER" = "T3b-candidate" ]; then
         if git show ":$file" 2>/dev/null | gs_has_private_key; then
             TIER="T3b-privatekey"
         else
             continue
         fi
+    fi
+    if gs_is_allowlisted "$file"; then
+        # Tier 3b private-key content is never exemptible: content scanners do
+        # not cover every key format (notably PuTTY). Other allowlisted paths
+        # still proceed to Gitleaks and TruffleHog below.
+        if [ "$TIER" = "T3b-privatekey" ]; then
+            DANGEROUS="${DANGEROUS}  [${TIER}] ${file}"$'\n'
+            continue
+        fi
+        echo "[Git Safety] Allowlisted (gate 2 only, content still scanned): $file"
+        continue
     fi
     DANGEROUS="${DANGEROUS}  [${TIER}] ${file}"$'\n'
 done

@@ -1,6 +1,6 @@
 #!/bin/bash
 # Git Safety Pre-Push Hook
-# git-safety-version: 2
+# git-safety-version: 4
 #
 # Guards the remote, then re-runs the dangerous-file gate over the commit
 # range being pushed. Its purpose is to catch what reached a commit via
@@ -13,9 +13,9 @@
 set -e
 export PATH="$HOME/.local/bin:$HOME/bin:/usr/local/bin:/usr/bin:/bin:$PATH"
 
-# git passes the remote NAME as $1. Used only for the "git fetch <remote>"
-# hint in the range-error message - it does NOT scope the scan.
+# git passes the remote name as $1 and the actual target URL as $2.
 GS_REMOTE_NAME="${1:-}"
+GS_REMOTE_URL="${2:-}"
 
 # Interpreter floor, same as pre-commit.
 if [ -z "${BASH_VERSINFO+x}" ] || [ "${BASH_VERSINFO[0]}" -lt 3 ] \
@@ -37,11 +37,18 @@ source "$LIB"
 GIT_SAFETY_PRIVATE_PARENT="${GIT_SAFETY_PRIVATE_PARENT:-}"
 GIT_SAFETY_BLOCKED_REMOTES="${GIT_SAFETY_BLOCKED_REMOTES:-}"
 GIT_SAFETY_CONTACT="${GIT_SAFETY_CONTACT:-the repository owner}"
+# shellcheck source=/dev/null
 [ -f "$HOME/.config/git-safety/config" ] && . "$HOME/.config/git-safety/config"
 
 REPO_ROOT=$(git rev-parse --show-toplevel)
 REPO_NAME=$(basename "$REPO_ROOT")
-REMOTE_URL=$(git remote get-url origin 2>/dev/null || echo "NO_REMOTE")
+if [ -n "$GS_REMOTE_URL" ]; then
+    REMOTE_URL="$GS_REMOTE_URL"
+elif [ -n "$GS_REMOTE_NAME" ]; then
+    REMOTE_URL=$(git remote get-url "$GS_REMOTE_NAME" 2>/dev/null || echo "NO_REMOTE")
+else
+    REMOTE_URL="NO_REMOTE"
+fi
 
 stop_banner() {
     echo "╔══════════════════════════════════════════════════╗"
@@ -150,18 +157,10 @@ fi
 # --- Dangerous file gate over the push range ---
 gs_load_allowlist "$REPO_ROOT"
 DANGEROUS=""
-GS_SEEN=""
 for file in "${GS_FILES[@]}"; do
     [ -z "$file" ] && continue
-    # Dedupe here rather than with `sort -u` on the capture, which would have
-    # masked git's exit status.
-    case "$GS_SEEN" in
-        *"|${file}|"*) continue ;;
-    esac
-    GS_SEEN="${GS_SEEN}|${file}|"
     TIER=$(gs_classify_path "$file")
     [ -z "$TIER" ] && continue
-    gs_is_allowlisted "$file" && continue
     # Tier 3b blocks on NAME here, unlike pre-commit. The push range spans
     # many commits, so a content check anchored at HEAD misses a file added
     # and then deleted within the range - verified: a private-key .pem
@@ -172,12 +171,17 @@ for file in "${GS_FILES[@]}"; do
     # Known public CA bundles are exempt HERE ONLY. pre-commit content-checks
     # them instead; this hook cannot afford a content read across a whole push
     # range, and without the exemption 14 repos could not push a branch.
-    if [ "$TIER" = "T3b-candidate" ] && gs_is_public_cert_name "$file"; then
+    if [ "$TIER" = "T3b-candidate" ]; then
+        if gs_is_public_cert_name "$file"; then
+            continue
+        fi
+        # Allowlisting cannot exempt a private-key-shaped filename here. This
+        # gate exists specifically for commits made with --no-verify, and the
+        # historical blob may use a key format content scanners do not catch.
+        TIER="T3b-name"
+    elif gs_is_allowlisted "$file"; then
         continue
     fi
-    # Relabelled: "T3b-candidate" means "content check required" in the
-    # library, and no content check happens here. Printing it would be a lie.
-    [ "$TIER" = "T3b-candidate" ] && TIER="T3b-name"
     DANGEROUS="${DANGEROUS}  [$TIER] $file"$'\n'
 done
 

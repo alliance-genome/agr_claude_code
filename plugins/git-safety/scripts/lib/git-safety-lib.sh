@@ -1,11 +1,12 @@
 #!/bin/bash
 # Git Safety - shared dangerous-file matcher.
-# git-safety-version: 2
+# git-safety-version: 4
 #
 # Sourced by the pre-commit and pre-push hooks. Contains no machine-specific
 # paths: it is published to a public plugin repository.
 
-GIT_SAFETY_VERSION=2
+# shellcheck disable=SC2034  # consumed as installed-file metadata
+GIT_SAFETY_VERSION=4
 
 # Tier 2: shell and REPL history files, matched by exact basename.
 GS_T2_HISTORY=(
@@ -165,6 +166,7 @@ gs_pattern_too_broad() {
         "${GS_T2_HISTORY[@]}" "${GS_T4_NAMES[@]}" "${GS_T4_PATHS[@]}"
     )
     for c in "${canaries[@]}"; do
+        # shellcheck disable=SC2254  # pat is intentionally a glob
         case "$c" in
             $pat)
                 # Naming a canary literally is a deliberate, reviewable choice.

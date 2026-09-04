@@ -250,7 +250,7 @@ Example requests:
 - "Create an epic for the new search feature with 4 subtasks."
 - "Move SCRUM-1234 to In Progress."
 
-**git-safety**: Installs git pre-commit hooks that scan for secrets before each commit using [Gitleaks](https://github.com/gitleaks/gitleaks) and [TruffleHog](https://github.com/trufflesecurity/trufflehog). If you accidentally try to commit an API key or password, the commit is blocked. Run `/secure-repo` to set it up on any repository.
+**git-safety**: Installs git pre-commit and pre-push hooks that scan for secrets using [Gitleaks](https://github.com/gitleaks/gitleaks), [TruffleHog](https://github.com/trufflesecurity/trufflehog), and dangerous-filename checks. If you accidentally try to commit or push an API key or password, the operation is blocked. Run `/secure-repo` to set it up on any repository.
 
 **linkml-reviewer**: Expert schema reviewer for the Alliance LinkML curation schema (`agr_curation_schema`). Reviews new or modified schema files for correctness, consistency, and adherence to Alliance conventions. Includes a full reviewer checklist, convention severity levels (ENFORCED/ADVISORY/TECH-DEBT), DTO suffix mappings, and reference data for the complete class hierarchy and import graph. Use `/linkml-review` when reviewing schema PRs or proposing changes.
 

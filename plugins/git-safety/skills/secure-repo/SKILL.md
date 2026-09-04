@@ -74,14 +74,19 @@ Once tools are installed, add the pre-commit hook to your repository.
 # Verify you're in a git repo
 git rev-parse --show-toplevel
 
+# Resolve the effective hooks directory (including linked worktrees and
+# core.hooksPath) instead of assuming .git is a directory.
+HOOK_DIR=$(git rev-parse --git-path hooks)
+mkdir -p "$HOOK_DIR"
+
 # Copy the shared library FIRST - the hooks fail closed without it
-cp "${CLAUDE_PLUGIN_ROOT}/scripts/lib/git-safety-lib.sh" .git/hooks/git-safety-lib.sh
-cp "${CLAUDE_PLUGIN_ROOT}/scripts/pre-commit"            .git/hooks/pre-commit
-cp "${CLAUDE_PLUGIN_ROOT}/scripts/pre-push"              .git/hooks/pre-push
-chmod +x .git/hooks/pre-commit .git/hooks/pre-push
+cp "${CLAUDE_PLUGIN_ROOT}/scripts/lib/git-safety-lib.sh" "$HOOK_DIR/git-safety-lib.sh"
+cp "${CLAUDE_PLUGIN_ROOT}/scripts/pre-commit"            "$HOOK_DIR/pre-commit"
+cp "${CLAUDE_PLUGIN_ROOT}/scripts/pre-push"              "$HOOK_DIR/pre-push"
+chmod +x "$HOOK_DIR/pre-commit" "$HOOK_DIR/pre-push"
 
 # Verify installation
-echo "Hook installed:" && ls -la .git/hooks/pre-commit
+echo "Hooks installed:" && ls -la "$HOOK_DIR/pre-commit" "$HOOK_DIR/pre-push"
 ```
 
 ### To a Specific Repository
@@ -89,10 +94,15 @@ echo "Hook installed:" && ls -la .git/hooks/pre-commit
 ```bash
 # Replace REPO_PATH with the target directory
 REPO_PATH="path/to/repo"
-cp "${CLAUDE_PLUGIN_ROOT}/scripts/lib/git-safety-lib.sh" "${REPO_PATH}/.git/hooks/git-safety-lib.sh"
-cp "${CLAUDE_PLUGIN_ROOT}/scripts/pre-commit"            "${REPO_PATH}/.git/hooks/pre-commit"
-cp "${CLAUDE_PLUGIN_ROOT}/scripts/pre-push"              "${REPO_PATH}/.git/hooks/pre-push"
-chmod +x "${REPO_PATH}/.git/hooks/pre-commit" "${REPO_PATH}/.git/hooks/pre-push"
+(
+  cd "$REPO_PATH"
+  HOOK_DIR=$(git rev-parse --git-path hooks)
+  mkdir -p "$HOOK_DIR"
+  cp "${CLAUDE_PLUGIN_ROOT}/scripts/lib/git-safety-lib.sh" "$HOOK_DIR/git-safety-lib.sh"
+  cp "${CLAUDE_PLUGIN_ROOT}/scripts/pre-commit"            "$HOOK_DIR/pre-commit"
+  cp "${CLAUDE_PLUGIN_ROOT}/scripts/pre-push"              "$HOOK_DIR/pre-push"
+  chmod +x "$HOOK_DIR/pre-commit" "$HOOK_DIR/pre-push"
+)
 ```
 
 ---
