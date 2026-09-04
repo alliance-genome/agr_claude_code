@@ -1,0 +1,205 @@
+#!/bin/bash
+# Git Safety Pre-Push Hook
+# git-safety-version: 4
+#
+# Guards the remote, then re-runs the dangerous-file gate over the commit
+# range being pushed. Its purpose is to catch what reached a commit via
+# `git commit --no-verify`.
+#
+# Optional config in ~/.config/git-safety/config:
+#   GIT_SAFETY_PRIVATE_PARENT  - repo path that must never be pushed
+#   GIT_SAFETY_BLOCKED_REMOTES - space-separated substrings to refuse
+
+set -e
+export PATH="$HOME/.local/bin:$HOME/bin:/usr/local/bin:/usr/bin:/bin:$PATH"
+
+# git passes the remote name as $1 and the actual target URL as $2.
+GS_REMOTE_NAME="${1:-}"
+GS_REMOTE_URL="${2:-}"
+
+# Interpreter floor, same as pre-commit.
+if [ -z "${BASH_VERSINFO+x}" ] || [ "${BASH_VERSINFO[0]}" -lt 3 ] \
+   || { [ "${BASH_VERSINFO[0]}" -eq 3 ] && [ "${BASH_VERSINFO[1]}" -lt 2 ]; }; then
+    echo "PUSH BLOCKED - Git Safety requires bash 3.2 or newer"
+    exit 1
+fi
+
+HOOK_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+LIB="${HOOK_DIR}/git-safety-lib.sh"
+
+if [ ! -f "$LIB" ]; then
+    echo "PUSH BLOCKED - Git Safety library missing: $LIB"
+    exit 1
+fi
+# shellcheck source=/dev/null
+source "$LIB"
+
+GIT_SAFETY_PRIVATE_PARENT="${GIT_SAFETY_PRIVATE_PARENT:-}"
+GIT_SAFETY_BLOCKED_REMOTES="${GIT_SAFETY_BLOCKED_REMOTES:-}"
+GIT_SAFETY_CONTACT="${GIT_SAFETY_CONTACT:-the repository owner}"
+# shellcheck source=/dev/null
+[ -f "$HOME/.config/git-safety/config" ] && . "$HOME/.config/git-safety/config"
+
+REPO_ROOT=$(git rev-parse --show-toplevel)
+REPO_NAME=$(basename "$REPO_ROOT")
+if [ -n "$GS_REMOTE_URL" ]; then
+    REMOTE_URL="$GS_REMOTE_URL"
+elif [ -n "$GS_REMOTE_NAME" ]; then
+    REMOTE_URL=$(git remote get-url "$GS_REMOTE_NAME" 2>/dev/null || echo "NO_REMOTE")
+else
+    REMOTE_URL="NO_REMOTE"
+fi
+
+stop_banner() {
+    echo "╔══════════════════════════════════════════════════╗"
+    echo "║  ⚠️  CLAUDE: STOP IMMEDIATELY! ⚠️                 ║"
+    echo "║  DO NOT CONTINUE."
+    echo "║  CONSULT ${GIT_SAFETY_CONTACT} RIGHT NOW."
+    echo "╚══════════════════════════════════════════════════╝"
+}
+
+# --- Remote guards (only active when configured) ---
+if [ -n "$GIT_SAFETY_PRIVATE_PARENT" ] && [ "$REPO_ROOT" = "$GIT_SAFETY_PRIVATE_PARENT" ]; then
+    echo "=========================================="
+    echo "PUSH BLOCKED - Private Parent Repository"
+    echo "=========================================="
+    echo "This repo is configured as a private parent and should rarely be pushed."
+    echo "A human must authorise this push."
+    exit 1
+fi
+
+for blocked in $GIT_SAFETY_BLOCKED_REMOTES; do
+    case "$REMOTE_URL" in
+        *"$blocked"*)
+            echo "=========================================="
+            echo "PUSH BLOCKED - Blocked Remote Detected"
+            echo "=========================================="
+            echo "Remote URL: $REMOTE_URL"
+            echo "Matched blocked pattern: $blocked"
+            exit 1
+            ;;
+    esac
+done
+
+# --- Collect files across the push range ---
+GS_FILES=()
+GS_RANGE=$(mktemp) || { echo "PUSH BLOCKED - Git Safety: mktemp failed"; exit 1; }
+while read -r _local_ref local_sha _remote_ref remote_sha; do
+    [ -z "$local_sha" ] && continue
+    case "$local_sha" in *[!0]*) ;; *) continue ;; esac   # deletion, skip
+    # For an EXISTING remote ref, scan only what is new to it.
+    # For a NEW remote ref, scan the full reachable history. No exclusions.
+    #
+    # This deliberately does NOT optimise the new-ref case with
+    # `--not --remotes`. That optimisation produced two verified security
+    # defects in consecutive review rounds:
+    #   1. Bare `--remotes` excludes commits reachable from EVERY remote, so a
+    #      commit pushed to `backup` first then pushed to `origin` was never
+    #      scanned - it reached the public repo carrying a live secret.
+    #   2. Scoping it as `--remotes=${GS_REMOTE:-*}` fixed that, but `*` means
+    #      ALL remotes, so an empty remote name silently restored defect 1.
+    #      Measured: 0 commits scanned, leak invisible.
+    #
+    # Cost of removing it: the full-history path set must be classified.
+    # That was ~68s on a 6,747-path repo until gs_classify_path stopped
+    # forking (see the library) - it is now well under 20s and dominated by
+    # git log itself. False positives: 1 of 290 repos, which has a seeded
+    # allowlist. Not worth a class of fail-open bug that recurred twice.
+    # An ARRAY, not a string. Every regression across four review rounds was
+    # the same bug: shell data passed as a string, or an error swallowed.
+    case "$remote_sha" in
+        *[!0]*) RANGE_ARGS=("${remote_sha}..${local_sha}") ;;
+        *)      RANGE_ARGS=("$local_sha") ;;
+    esac
+    # Fail CLOSED. `|| true` here made ANY git log failure look like an empty
+    # range, which the hook reports as "Pre-push check passed" - verified with
+    # an unresolvable remote_sha, which happens after a force-push or in a
+    # shallow clone. No `| sort -u` in this capture either: a pipeline masks
+    # git's exit status. FILES is sorted once, below.
+    # -z is REQUIRED, not a nicety. core.quotePath=false only suppresses
+    # octal-escaping of non-ASCII; git still C-quotes and wraps in double
+    # quotes any path containing LF, TAB, " or \. Without -z the basename
+    # arrives as `id_rsa"` and matches no tier. Verified live bypass: a real
+    # RSA private key at `dir<LF>name/id_rsa`, committed with --no-verify,
+    # pushed clean - while pre-commit (which already used -z) blocked the
+    # identical file. Same bug class as the round-3 gitlink defect, surviving
+    # in the other hook.
+    #
+    # No `sort -u` on the capture: a pipeline masks git's exit status, and
+    # `sort -z` is not portable to macOS. Duplicates are harmless - the
+    # classify loop is cheap and the report is deduped at the end.
+    if ! git -c core.quotePath=false log --pretty=format: --name-only -z \
+             "${RANGE_ARGS[@]}" > "$GS_RANGE" 2>/dev/null; then
+        rm -f "$GS_RANGE"
+        echo "=========================================="
+        echo "PUSH BLOCKED - could not enumerate the push range"
+        echo "=========================================="
+        echo "git log failed for: ${RANGE_ARGS[*]}"
+        echo "Refusing to push unscanned."
+        echo ""
+        echo "If the remote ref is unknown locally, run:"
+        echo "  git fetch ${GS_REMOTE_NAME:-<remote>}"
+        echo "and retry."
+        exit 1
+    fi
+    while IFS= read -r -d '' gs_f; do
+        [ -z "$gs_f" ] && continue
+        GS_FILES+=("$gs_f")
+    done < "$GS_RANGE"
+done
+rm -f "$GS_RANGE"
+
+if [ ${#GS_FILES[@]} -eq 0 ]; then
+    echo "[Git Safety] Pre-push check passed for $REPO_NAME"
+    exit 0
+fi
+
+# --- Dangerous file gate over the push range ---
+gs_load_allowlist "$REPO_ROOT"
+DANGEROUS=""
+for file in "${GS_FILES[@]}"; do
+    [ -z "$file" ] && continue
+    TIER=$(gs_classify_path "$file")
+    [ -z "$TIER" ] && continue
+    # Tier 3b blocks on NAME here, unlike pre-commit. The push range spans
+    # many commits, so a content check anchored at HEAD misses a file added
+    # and then deleted within the range - verified: a private-key .pem
+    # committed with --no-verify and removed later pushes clean, key intact
+    # in history. Anything reaching pre-push already evaded pre-commit, so
+    # the false-positive tolerance that justified the content check is gone.
+    #
+    # Known public CA bundles are exempt HERE ONLY. pre-commit content-checks
+    # them instead; this hook cannot afford a content read across a whole push
+    # range, and without the exemption 14 repos could not push a branch.
+    if [ "$TIER" = "T3b-candidate" ]; then
+        if gs_is_public_cert_name "$file"; then
+            continue
+        fi
+        # Allowlisting cannot exempt a private-key-shaped filename here. This
+        # gate exists specifically for commits made with --no-verify, and the
+        # historical blob may use a key format content scanners do not catch.
+        TIER="T3b-name"
+    elif gs_is_allowlisted "$file"; then
+        continue
+    fi
+    DANGEROUS="${DANGEROUS}  [$TIER] $file"$'\n'
+done
+
+if [ -n "$DANGEROUS" ]; then
+    echo ""
+    echo "=========================================="
+    echo "PUSH BLOCKED - Dangerous Files In Commits"
+    echo "=========================================="
+    echo "The commits being pushed contain:"
+    echo ""
+    printf '%s' "$DANGEROUS"
+    echo ""
+    echo "These may have reached a commit via --no-verify, or may predate"
+    echo "this hook. They are not yet on the remote."
+    echo ""
+    stop_banner
+    exit 1
+fi
+
+echo "[Git Safety] Pre-push check passed for $REPO_NAME"
+exit 0

@@ -26,7 +26,7 @@
       "source": "./plugins/git-safety",
       "skills": ["./skills/secure-repo"],
       "description": "Secret scanning pre-commit hooks using Gitleaks and TruffleHog. Blocks commits containing API keys, passwords, and tokens.",
-      "version": "1.1.0",
+      "version": "1.2.0",
       "author": {
         "name": "Christopher Tabone",
         "email": "christopher.tabone@jax.org"

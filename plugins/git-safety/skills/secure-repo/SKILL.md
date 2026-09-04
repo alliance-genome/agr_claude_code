@@ -74,12 +74,19 @@ Once tools are installed, add the pre-commit hook to your repository.
 # Verify you're in a git repo
 git rev-parse --show-toplevel
 
-# Copy the pre-commit hook
-cp "${CLAUDE_PLUGIN_ROOT}/scripts/pre-commit" .git/hooks/pre-commit
-chmod +x .git/hooks/pre-commit
+# Resolve the effective hooks directory (including linked worktrees and
+# core.hooksPath) instead of assuming .git is a directory.
+HOOK_DIR=$(git rev-parse --git-path hooks)
+mkdir -p "$HOOK_DIR"
+
+# Copy the shared library FIRST - the hooks fail closed without it
+cp "${CLAUDE_PLUGIN_ROOT}/scripts/lib/git-safety-lib.sh" "$HOOK_DIR/git-safety-lib.sh"
+cp "${CLAUDE_PLUGIN_ROOT}/scripts/pre-commit"            "$HOOK_DIR/pre-commit"
+cp "${CLAUDE_PLUGIN_ROOT}/scripts/pre-push"              "$HOOK_DIR/pre-push"
+chmod +x "$HOOK_DIR/pre-commit" "$HOOK_DIR/pre-push"
 
 # Verify installation
-echo "Hook installed:" && ls -la .git/hooks/pre-commit
+echo "Hooks installed:" && ls -la "$HOOK_DIR/pre-commit" "$HOOK_DIR/pre-push"
 ```
 
 ### To a Specific Repository
@@ -87,20 +94,72 @@ echo "Hook installed:" && ls -la .git/hooks/pre-commit
 ```bash
 # Replace REPO_PATH with the target directory
 REPO_PATH="path/to/repo"
-cp "${CLAUDE_PLUGIN_ROOT}/scripts/pre-commit" "${REPO_PATH}/.git/hooks/pre-commit"
-chmod +x "${REPO_PATH}/.git/hooks/pre-commit"
+(
+  cd "$REPO_PATH"
+  HOOK_DIR=$(git rev-parse --git-path hooks)
+  mkdir -p "$HOOK_DIR"
+  cp "${CLAUDE_PLUGIN_ROOT}/scripts/lib/git-safety-lib.sh" "$HOOK_DIR/git-safety-lib.sh"
+  cp "${CLAUDE_PLUGIN_ROOT}/scripts/pre-commit"            "$HOOK_DIR/pre-commit"
+  cp "${CLAUDE_PLUGIN_ROOT}/scripts/pre-push"              "$HOOK_DIR/pre-push"
+  chmod +x "$HOOK_DIR/pre-commit" "$HOOK_DIR/pre-push"
+)
 ```
 
 ---
 
-## What the Hook Does
+## What the Hooks Do
 
-On every `git commit`, the pre-commit hook:
+`pre-commit` runs four gates in order:
 
-1. **Gitleaks scan** - Detects API keys, passwords, tokens, private keys
-2. **TruffleHog scan** - Detects AWS keys, Slack webhooks, other secrets
+1. **Parent directory protection** - staged paths must not escape the repo root
+2. **Dangerous file check** - blocks by filename, before any content scan:
+   - Tier 1: `.bash*` / `*.bash*` (deliberately broad - catches `.bash_history`)
+   - Tier 2: shell and REPL histories (`.zsh_history`, `.python_history`, ...)
+   - Tier 3a: keystores by name (`.p12`, `.pfx`, `.jks`, `.kdbx`, `.p8`, ...)
+   - Tier 3b: `.pem` / `.key` / `id_rsa` blocked **only if content holds a private key**
+   - Tier 4: credential files (`.netrc`, `.pgpass`, `.aws/credentials`, ...)
+   - `*.pub` is never blocked. Matching is case-insensitive.
+3. **Gitleaks** - content scan
+4. **TruffleHog** - content scan
 
-If either tool finds potential secrets, the commit is **blocked**.
+`pre-push` re-runs gate 2 over the commits being pushed, catching anything that
+reached a commit via `--no-verify`. There tier 3b blocks on name alone, so
+known public CA bundles such as `ca-certs.pem` are exempt at push only -
+`pre-commit` still content-checks them.
+
+## The `.gitsafety-allow` Escape Hatch
+
+Tier 1 is broad by design and will hit legitimate files such as
+`scripts/setup.bash`. Allowlist them in a repo-root `.gitsafety-allow`, one
+glob per line:
+
+```
+# ROS build script, not a secret
+scripts/setup.bash
+docs/*.bash
+```
+
+- **It must be tracked.** The hook reads the *index blob*, so an unstaged edit
+  has no effect and every exemption is reviewable in the diff.
+- **Over-broad patterns are refused** (`*`, `?*`, `*.pem`, `.ssh/*`, ...).
+- **It suppresses the filename gate only.** Gitleaks and TruffleHog still scan
+  allowlisted files.
+
+## Optional Configuration
+
+`~/.config/git-safety/config` may set:
+
+- `GIT_SAFETY_PRIVATE_PARENT` - a repo path that must never be pushed
+- `GIT_SAFETY_BLOCKED_REMOTES` - space-separated remote substrings to refuse
+- `GIT_SAFETY_CONTACT` - who the escalation banner names (default: "the repository owner")
+
+All default to empty, so the hooks contain no machine-specific values.
+
+## Requirements
+
+Bash 3.2 or newer - macOS system bash is 3.2, and the hooks are tested against
+it. They fail closed: a missing library, an unreadable index, or a failed range
+enumeration blocks rather than silently skipping a gate.
 
 ---
 
