@@ -2,7 +2,7 @@
 
 File inventory for `agr_curation_schema/model/schema/` with class, slot, and enum counts per file.
 
-**Total**: 27 files, 371 classes, 13 enums, ~12,665 lines
+**Total**: 27 files, 372 classes, 13 enums, ~12,695 lines
 
 | File | Classes | Slots | Enums | Domain |
 |------|--------:|------:|------:|--------|
@@ -14,7 +14,7 @@ File inventory for `agr_curation_schema/model/schema/` with class, slot, and enu
 | biologicalEntitySet.yaml | 13 | 25 | 0 | Entity sets |
 | bulkload.yaml | 8 | 27 | 4 | Bulk loading |
 | controlledVocabulary.yaml | 3 | 5 | 0 | Vocabularies |
-| core.yaml | 58 | 144 | 1 | Foundation |
+| core.yaml | 59 | 144 | 1 | Foundation |
 | curationReport.yaml | 3 | 10 | 0 | Reports |
 | expression.yaml | 11 | 43 | 0 | Expression |
 | gene.yaml | 14 | 37 | 0 | Genes |
