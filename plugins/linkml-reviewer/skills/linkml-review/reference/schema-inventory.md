@@ -2,7 +2,7 @@
 
 File inventory for `agr_curation_schema/model/schema/` with class, slot, and enum counts per file.
 
-**Total**: 27 files, 369 classes, 13 enums, ~12,628 lines
+**Total**: 27 files, 372 classes, 13 enums, ~12,695 lines
 
 | File | Classes | Slots | Enums | Domain |
 |------|--------:|------:|------:|--------|
@@ -14,7 +14,7 @@ File inventory for `agr_curation_schema/model/schema/` with class, slot, and enu
 | biologicalEntitySet.yaml | 13 | 25 | 0 | Entity sets |
 | bulkload.yaml | 8 | 27 | 4 | Bulk loading |
 | controlledVocabulary.yaml | 3 | 5 | 0 | Vocabularies |
-| core.yaml | 58 | 144 | 1 | Foundation |
+| core.yaml | 59 | 144 | 1 | Foundation |
 | curationReport.yaml | 3 | 10 | 0 | Reports |
 | expression.yaml | 11 | 43 | 0 | Expression |
 | gene.yaml | 14 | 37 | 0 | Genes |
@@ -26,7 +26,7 @@ File inventory for `agr_curation_schema/model/schema/` with class, slot, and enu
 | modCorpusAssociation.yaml | 1 | 3 | 1 | MOD corpus |
 | ontologyTerm.yaml | 54 | 16 | 0 | Ontology terms |
 | phenotypeAndDiseaseAnnotation.yaml | 26 | 65 | 0 | Annotations |
-| reagent.yaml | 42 | 57 | 0 | Reagents |
+| reagent.yaml | 44 | 59 | 0 | Reagents |
 | reference.yaml | 6 | 32 | 3 | Publications |
 | resource.yaml | 1 | 8 | 0 | Resources |
 | resourceDescriptor.yaml | 2 | 6 | 0 | URL templates |
