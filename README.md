@@ -10,6 +10,7 @@ Shared Claude Code configurations, plugins, and best practices for Alliance of G
 
 - [What is Claude Code?](#what-is-claude-code)
 - [Getting Started](#getting-started)
+  - [Migrating from an API Key](#migrating-from-an-api-key)
 - [Essential Tips](#essential-tips)
 - [Extending Claude Code](#extending-claude-code)
   - [Plugins](#plugins)
@@ -42,16 +43,18 @@ Claude: I'll add try/catch blocks and proper error messages. Let me read the cur
 
 ## Getting Started
 
-### Step 1: Request Access to the Alliance Anthropic Group
+### Step 1: Request Access to the Alliance Claude Team
 
-To get started with Claude Code at the Alliance, you need to be added to our Anthropic organization:
+To get started with Claude Code at the Alliance, you need a seat on our Claude Team plan:
 
 1. **Message Chris T on the Alliance Slack**
 2. **Include in your message:**
-   - A request to be added to the Alliance Anthropic group
+   - A request for a seat on the Alliance Claude Team plan
    - The email address you want to use for your Claude account
 
-You'll receive an email invitation to join the Alliance Anthropic organization once your request is processed.
+You'll receive an email invitation to join the Alliance Claude Team once your request is processed. Accept the invitation before you continue.
+
+> **Note:** The Alliance moved from API keys to the Claude Team plan. Claude Code now authenticates through your Team account, so you no longer need an Anthropic Console account or an API key. See [Migrating from an API key](#migrating-from-an-api-key) if you set up Claude Code before the move.
 
 ### Step 2: Read the Official Quickstart
 
@@ -97,7 +100,17 @@ brew install --cask claude-code
    ```
 3. **Log in** when prompted:
    - Use the email you provided in Step 1
-   - **Important:** When asked to choose an account type, select the **second option**: **"Anthropic Console Account"** (API Usage Billing). Don't select the first option (Claude Pro/Max subscription).
+   - **Important:** Claude Code asks you to `Select login method:`. Choose the **first option, "Claude account with subscription"** (Pro, Max, Team, or Enterprise). Your browser opens to finish the login.
+
+   ```
+   Select login method:
+
+   > Claude account with subscription   Pro, Max, Team, or Enterprise
+     Anthropic Console account          API usage billing
+     3rd-party platform                 Amazon Bedrock, Microsoft Foundry, or Vertex AI
+   ```
+
+   > ⚠️ **Do not select "Anthropic Console account".** That option bills through an Anthropic API key. The Alliance disabled its API keys when we moved to the Team plan, so that path now fails with a `401 API key is invalid` error.
 4. **Start coding!** Try asking:
    ```
    > what does this project do?
@@ -138,6 +151,35 @@ A few things that make those prompts less frequent and less stressful:
 - **Pick "Yes, don't ask again"** when the prompt appears. Claude remembers that choice and won't ask about that same action again.
 - **Press `Shift+Tab`** to switch into **accept-edits mode**. Claude will auto-approve safe file reads and edits but still ask before running terminal commands. Press `Shift+Tab` again to cycle back. This is a good middle ground for most curator work.
 - **Run `/permissions`** any time to view or remove things you've previously allowed.
+
+### Migrating from an API Key
+
+If you set up Claude Code before the Alliance moved to the Claude Team plan, you authenticated with an Anthropic API key. Those keys are disabled. Follow these steps to switch over.
+
+**Symptom:** `claude` fails with `401 API key is invalid`, or `/status` shows an `API key` row.
+
+1. **Accept your Claude Team invitation.** Ask Chris T on Slack if you never received one.
+2. **Remove any stored API key from your environment.** Check your shell profile (`~/.zshrc`, `~/.bashrc`, or `~/.bash_profile`) and delete any line that sets `ANTHROPIC_API_KEY`. Then run:
+   ```bash
+   unset ANTHROPIC_API_KEY
+   ```
+   An API key in your environment takes priority over your Team login, so Claude Code keeps failing until you remove it. Also check the `env` block of `~/.claude/settings.json` for the same variable.
+3. **Log out of the old credentials:**
+   ```
+   /logout
+   ```
+4. **Log back in:**
+   ```
+   /login
+   ```
+   Select **"Claude account with subscription"**, then sign in with your Alliance email.
+5. **Confirm it worked:**
+   ```
+   /status
+   ```
+   The `Login method` row should name your Claude account. No `API key` row should appear.
+
+> **A note on platform.claude.com:** That site is the Anthropic Console, which the Alliance no longer uses. If you sign in there you'll see *"You are not a member of any organizations under your domain."* That message is expected and does not mean your access is broken. Claude Code and Claude on the web now both use [claude.ai](https://claude.ai).
 
 ### Additional Resources
 
