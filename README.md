@@ -3,8 +3,9 @@
 Shared Claude Code configurations, plugins, and best practices for Alliance of Genome Resources developers.
 
 > [!IMPORTANT]
-> **Claude Code runs in a regular terminal, not in the Claude web UI.**
-> Alliance access is for the Claude Code command-line tool only. If the Claude website or Claude desktop chat app still shows a personal `Free` plan, that is expected. To use Alliance-provided Claude Code access, open a normal terminal window on your computer (for example Terminal, iTerm, Windows Terminal, or PowerShell) and run Claude Code there.
+> **Your Alliance seat is on the Claude Team plan.** One account covers Claude Code in your terminal, Claude on the web at [claude.ai](https://claude.ai), and the Claude desktop app. Sign in with your Alliance email everywhere.
+>
+> If the website or the desktop app shows a personal `Free` plan, you are signed in with a different account. Switch accounts, or ask Chris T on Slack if your Alliance account isn't listed.
 
 ## Table of Contents
 
@@ -116,18 +117,23 @@ brew install --cask claude-code
    > what does this project do?
    ```
 
-### Step 5: Set Your Model to Opus
+### Step 5: Check Your Model
 
-⚠️ **Important:** Make sure your model is set to Opus for the best results.
+Run `/model` to see which model you are on and to change it:
 
-**Check and set your model:**
 ```
 /model
 ```
 
-Select **Opus** from the list. This setting persists across sessions.
+| Model | What Claude Code says about it |
+|-------|--------------------------------|
+| **Sonnet 5** | Efficient for routine tasks. Generally recommended for most coding tasks. |
+| **Opus 5** | Best for everyday, complex tasks. |
+| **Fable 5.1** | Most capable for your hardest and longest-running tasks. |
 
-**Why Opus?** Opus is Claude's most capable model - it handles complex codebases better, makes fewer mistakes, and produces higher quality code. If you're finding Claude's suggestions unhelpful or off-target, check that you're using Opus.
+Your default depends on the Team tier your seat is on. Sonnet 5 handles most day-to-day work well. Switch to **Opus 5** for large codebases, tricky debugging, or any time Claude's suggestions feel off-target. The setting persists across sessions.
+
+> **About Fable 5.1:** it is the most capable model and suits long autonomous sessions, but it is not the default on any plan and its usage can bill to extra usage credits. Ask Chris T before you make it your default.
 
 ### Step 6: Customize Claude for Your Workflow (Especially for Curators)
 
@@ -142,15 +148,19 @@ Open Claude in any folder and tell it (you can copy-paste this and edit it to yo
 
 Claude will create or edit that file for you. It is loaded automatically every time you start Claude Code on this computer, so you only have to do this once. You can come back any time and ask Claude to add, change, or remove instructions.
 
-#### About those "Do you want me to proceed?" prompts
+#### About permission prompts
 
-By default, Claude asks permission before editing files or running terminal commands. **This is a safety feature, not a sign that something is wrong** — Claude is checking with you before doing something it can't easily undo. You can always say no and Claude will adjust.
+On the Team plan, terminal sessions start in **auto mode**. Claude reads files, makes edits, and runs routine commands without asking you each time. A separate safety model reviews each action in the background and still blocks the risky ones, such as force pushes, mass deletions, and production deploys. The status bar shows `⏵⏵ auto mode on`.
 
-A few things that make those prompts less frequent and less stressful:
+You will still see a prompt now and then. **That is a safety feature, not a sign that something is wrong.** Claude is checking before it does something it cannot easily undo. Say no any time and Claude adjusts.
 
-- **Pick "Yes, don't ask again"** when the prompt appears. Claude remembers that choice and won't ask about that same action again.
-- **Press `Shift+Tab`** to switch into **accept-edits mode**. Claude will auto-approve safe file reads and edits but still ask before running terminal commands. Press `Shift+Tab` again to cycle back. This is a good middle ground for most curator work.
-- **Run `/permissions`** any time to view or remove things you've previously allowed.
+If you want Claude to check with you more often:
+
+- **Press `Shift+Tab`** to leave auto mode. The first press puts you in **Manual** mode, where Claude asks before every edit and command. Keep pressing to cycle through `Manual → accept edits → plan → auto`. The status bar names the active mode.
+- **Pick "Yes, don't ask again"** when a prompt appears, and Claude stops asking about that same action.
+- **Run `/permissions`** any time to see or remove what you previously allowed.
+
+See [Auto Mode](#auto-mode) for the full picture.
 
 ### Migrating from an API Key
 
@@ -214,12 +224,15 @@ You: I want to add caching to the API client. Before writing any code, please ex
 
 After completing a significant chunk of code, have Claude review the work. This catches bugs, security issues, and style problems before they make it into your commits.
 
-**Install the code-review plugin** ([plugins are explained in more detail below](#plugins)):
+Claude Code ships with a `/code-review` command, so there is nothing to install:
+
 ```
-/plugin install code-review@claude-plugins-official
+/code-review
 ```
 
-Then ask Claude to review your changes:
+It reviews your current diff for correctness bugs and cleanup opportunities. Add `--fix` to apply the findings, or pass a PR number or branch to review that instead.
+
+You can also ask Claude to review your changes in your own words:
 ```
 You: Please spawn a sub-agent to review the changes I just made to the authentication module.
 ```
@@ -427,37 +440,47 @@ For more details, see the [AGR MCP Server repository](https://github.com/allianc
 
 ## Tips & Best Practices
 
-### Speed Up with Auto Mode
+### Auto Mode
 
-By default, Claude Code asks for permission before running commands, editing files, or performing other actions. This is safe but can slow you down when you're in the flow.
+**Auto mode is already on.** On the Team plan, terminal sessions start in auto mode, so you do not need to turn it on. The status bar shows `⏵⏵ auto mode on`.
 
-**Auto mode** lets Claude work continuously without stopping for routine confirmations, while still blocking irreversible or destructive actions through a built-in safety classifier.
+If your sessions still start in Manual mode, check `claude --version`. Auto mode became the starting mode in v2.1.228 on macOS, Linux, and WSL, and v2.1.233 on native Windows. Native installs update themselves; Homebrew and WinGet do not.
 
-**How to turn it on:**
+In auto mode Claude reads files, makes edits, runs tests, and executes routine commands without stopping to ask after every action. A second model, the classifier, reviews each action in the background instead of you.
 
-- **Press `Shift+Tab`** to cycle through permission modes until you see `auto` in the status bar (`default → acceptEdits → plan → auto`).
-- Or start Claude with the flag: `claude --permission-mode auto`
-- Or set it as your default in `~/.claude/settings.json`:
-  ```json
-  {
-    "permissions": {
-      "defaultMode": "auto"
-    }
+**What the classifier still blocks:** force pushes, mass deletions, `curl | bash`, production deploys, sending secrets outside the repository, and changes to systems Claude doesn't recognize. Your `deny` rules and any instruction you gave in conversation (*"don't push to main"*) still apply. If the classifier blocks 3 actions in a row, or 20 in the session, auto mode pauses and Claude Code asks you again.
+
+**The permission modes:**
+
+| Mode | Runs without asking | Best for |
+|------|---------------------|----------|
+| `auto` | Everything, with background safety checks | Long tasks, fewer prompts. **The default.** |
+| Manual (`default`) | Reads only | Reviewing every action yourself, sensitive work |
+| `acceptEdits` | Reads, file edits, common filesystem commands | Iterating on code you're reviewing |
+| `plan` | Reads, plus classifier-approved commands | Exploring a codebase before changing it |
+
+**Switching modes:** press `Shift+Tab`. From auto, the first press drops you to Manual, then the cycle runs `Manual → acceptEdits → plan → auto`.
+
+**To start in a different mode every session,** set it in `~/.claude/settings.json`:
+```json
+{
+  "permissions": {
+    "defaultMode": "acceptEdits"
   }
-  ```
-
-**Why it's faster:** Claude can read files, make edits, run tests, and execute routine commands without stopping to ask "Is this okay?" after every action. This dramatically speeds up multi-step work.
-
-**Why it's safe:** Auto mode routes every action through a safety classifier that still blocks things like force pushes, mass deletions, `curl | bash`, production deploys, and changes to systems Claude doesn't recognize. Your `deny` rules and any explicit instructions you've given (e.g., *"don't push to main"*) are still respected. If the classifier blocks too many actions in a row, auto mode automatically pauses and goes back to prompting.
-
-**Recommendations:**
-- Use it for feature branches, test projects, and exploratory work
-- Be more cautious when working with production code or sensitive data
-- Make sure you have recent commits or backups before starting
-- Run `/secure-repo` first to install [git-safety hooks](#alliance-plugins) - this gives you another layer of protection against accidentally committing secrets
+}
+```
 
 > [!NOTE]
-> Auto mode is a research preview and requires a Max, Team, Enterprise, or API plan plus a recent Claude model (Sonnet 4.6+ or Opus 4.6+). If `auto` doesn't appear when you cycle with `Shift+Tab`, your account may not be eligible yet — `acceptEdits` mode is the next-best alternative.
+> `"auto"` only takes effect from `~/.claude/settings.json`. Set it in a project's `.claude/settings.json` and the session starts in Manual instead, with no error. Every other value works from any settings file.
+
+**Recommendations:**
+- Auto mode suits feature branches, test projects, and exploratory work
+- Drop to Manual with `Shift+Tab` when you work on production code or sensitive data
+- Make sure you have recent commits or backups before a long autonomous run
+- Run `/secure-repo` to install [git-safety hooks](#alliance-plugins), which add another layer of protection against committing secrets
+
+> [!NOTE]
+> Auto mode needs Opus 4.6 or later, Sonnet 4.6 or later, or a Fable model. It does not work on Sonnet 4.5, Opus 4.5, or any Haiku model. If `auto` never appears when you cycle with `Shift+Tab`, check `/model` first.
 
 ---
 
@@ -520,9 +543,12 @@ For more details, see the [Superpowers GitHub repository](https://github.com/obr
 
 ### Frontend Design with Claude
 
-Claude Code includes a built-in **frontend-design** skill that creates distinctive, production-grade frontend interfaces. Use this when building web components, pages, or applications that need polished visual design.
+The **frontend-design** plugin creates distinctive, production-grade frontend interfaces. Use it when building web components, pages, or applications that need polished visual design.
 
-**Installation:** None required - this skill is built into Claude Code.
+**Installation** (from the official Claude marketplace):
+```
+/plugin install frontend-design@claude-plugins-official
+```
 
 **Usage:**
 
