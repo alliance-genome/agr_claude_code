@@ -88,12 +88,20 @@ copying files. Updates then come from `pre-commit autoupdate`, not a re-copy.
 
 ```bash
 cd "$(git rev-parse --show-toplevel)"
-if [ -f .pre-commit-config.yaml ]; then
-  # Append the git-safety repo entry to the existing `repos:` list
-  sed -n '/^  - repo:/,$p' "${CLAUDE_PLUGIN_ROOT}/templates/pre-commit-config.yaml" >> .pre-commit-config.yaml
-else
+if [ ! -f .pre-commit-config.yaml ]; then
   cp "${CLAUDE_PLUGIN_ROOT}/templates/pre-commit-config.yaml" .pre-commit-config.yaml
 fi
+```
+
+If `.pre-commit-config.yaml` already exists, edit it by hand: add the `repo:`
+entry from `templates/pre-commit-config.yaml` to the existing `repos:` list.
+Match the list indentation already in the file (`pre-commit sample-config`
+writes `- repo:` at column 0) and keep the entry above any later top-level key
+such as `ci:`. Appending the template to the end of the file breaks both of
+those layouts. Then validate, pin and install:
+
+```bash
+pre-commit validate-config .pre-commit-config.yaml
 # Replace the `rev: main` placeholder with a pinned commit
 pre-commit autoupdate --freeze --repo https://github.com/alliance-genome/agr_claude_code
 pre-commit install
@@ -103,7 +111,6 @@ pre-commit run git-safety    # scans whatever is currently staged
 To pick up hook updates later, rerun the `pre-commit autoupdate` line.
 
 Notes:
-- Check the appended entry landed under `repos:` in an existing config.
 - `pre-commit install` refuses to run when `core.hooksPath` is set; unset it or
   use Option B.
 - An existing `.git/hooks/pre-commit` is moved to `pre-commit.legacy` and still
