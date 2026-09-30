@@ -316,7 +316,7 @@ Built specifically for Alliance developers:
 "Move SCRUM-1234 to In Progress."
 ```
 
-**git-safety** installs pre-commit and pre-push hooks that scan for secrets using [Gitleaks](https://github.com/gitleaks/gitleaks) and [TruffleHog](https://github.com/trufflesecurity/trufflehog), plus a check for dangerous filenames. Try to commit or push an API key or password and the operation stops. Run `/secure-repo` to set it up on any repository.
+**git-safety** installs pre-commit and pre-push hooks that scan for secrets using [Gitleaks](https://github.com/gitleaks/gitleaks), [TruffleHog](https://github.com/trufflesecurity/trufflehog) and, when installed, [ripsecrets](https://github.com/sirwart/ripsecrets), plus a check for dangerous filenames. Try to commit or push an API key or password and the operation stops. Run `/secure-repo` to set it up on any repository; repositories that use [pre-commit](https://pre-commit.com) can add the `git-safety` hook from this repo instead.
 
 **linkml-reviewer** reviews the Alliance LinkML curation schema (`agr_curation_schema`). It checks new or modified schema files for correctness, consistency, and Alliance conventions, and includes the reviewer checklist, the convention severity levels (ENFORCED, ADVISORY, TECH-DEBT), the DTO suffix mappings, and reference data for the class hierarchy and import graph. Run `/linkml-review` when you review a schema PR or propose a change.
 
