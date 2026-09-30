@@ -62,13 +62,58 @@ After installing, verify with:
 gitleaks version && trufflehog --version
 ```
 
+### Optional: ripsecrets
+
+[ripsecrets](https://github.com/sirwart/ripsecrets) is a single offline binary
+with no configuration. The hook runs it as an extra scan when it is installed,
+and it keeps scanning on machines where Gitleaks or TruffleHog is missing.
+
+```bash
+brew install ripsecrets    # macOS
+# Linux: download ripsecrets-<version>-x86_64-unknown-linux-gnu.tar.gz from
+# https://github.com/sirwart/ripsecrets/releases and put the binary on PATH
+```
+
 ---
 
 ## Step 2: Install Git Hooks
 
 Once tools are installed, add the pre-commit hook to your repository.
 
-### To Current Repository
+### Option A: pre-commit framework (preferred when `pre-commit` is installed)
+
+If the repository already uses [pre-commit](https://pre-commit.com), or
+`command -v pre-commit` succeeds, let pre-commit manage the hook instead of
+copying files. Updates then come from `pre-commit autoupdate`, not a re-copy.
+
+```bash
+cd "$(git rev-parse --show-toplevel)"
+if [ -f .pre-commit-config.yaml ]; then
+  # Append the git-safety repo entry to the existing `repos:` list
+  sed -n '/^  - repo:/,$p' "${CLAUDE_PLUGIN_ROOT}/templates/pre-commit-config.yaml" >> .pre-commit-config.yaml
+else
+  cp "${CLAUDE_PLUGIN_ROOT}/templates/pre-commit-config.yaml" .pre-commit-config.yaml
+fi
+# Replace the `rev: main` placeholder with a pinned commit
+pre-commit autoupdate --freeze --repo https://github.com/alliance-genome/agr_claude_code
+pre-commit install
+pre-commit run git-safety    # scans whatever is currently staged
+```
+
+To pick up hook updates later, rerun the `pre-commit autoupdate` line.
+
+Notes:
+- Check the appended entry landed under `repos:` in an existing config.
+- `pre-commit install` refuses to run when `core.hooksPath` is set; unset it or
+  use Option B.
+- An existing `.git/hooks/pre-commit` is moved to `pre-commit.legacy` and still
+  runs.
+- The framework only manages the `pre-commit` gate. Install `pre-push` (and the
+  library beside it) by copying, as in Option B.
+
+### Option B: Copy the hooks
+
+#### To Current Repository
 
 ```bash
 # Verify you're in a git repo
@@ -89,7 +134,7 @@ chmod +x "$HOOK_DIR/pre-commit" "$HOOK_DIR/pre-push"
 echo "Hooks installed:" && ls -la "$HOOK_DIR/pre-commit" "$HOOK_DIR/pre-push"
 ```
 
-### To a Specific Repository
+#### To a Specific Repository
 
 ```bash
 # Replace REPO_PATH with the target directory
@@ -109,7 +154,7 @@ REPO_PATH="path/to/repo"
 
 ## What the Hooks Do
 
-`pre-commit` runs four gates in order:
+`pre-commit` runs five gates in order:
 
 1. **Parent directory protection** - staged paths must not escape the repo root
 2. **Dangerous file check** - blocks by filename, before any content scan:
@@ -121,6 +166,11 @@ REPO_PATH="path/to/repo"
    - `*.pub` is never blocked. Matching is case-insensitive.
 3. **Gitleaks** - content scan
 4. **TruffleHog** - content scan
+5. **ripsecrets** - offline content scan (optional; runs when installed).
+   False positives go in a tracked `.secretsignore`; the index copy is used.
+
+If none of the three scanners is installed, the hook warns that staged content
+was not scanned.
 
 `pre-push` re-runs gate 2 over the commits being pushed, catching anything that
 reached a commit via `--no-verify`. There tier 3b blocks on name alone, so
@@ -142,8 +192,8 @@ docs/*.bash
 - **It must be tracked.** The hook reads the *index blob*, so an unstaged edit
   has no effect and every exemption is reviewable in the diff.
 - **Over-broad patterns are refused** (`*`, `?*`, `*.pem`, `.ssh/*`, ...).
-- **It suppresses the filename gate only.** Gitleaks and TruffleHog still scan
-  allowlisted files.
+- **It suppresses the filename gate only.** Gitleaks, TruffleHog and
+  ripsecrets still scan allowlisted files.
 
 ## Optional Configuration
 
@@ -184,7 +234,8 @@ rm test-secret.txt
 
 1. **Review the findings** - Check if it's a real secret or false positive
 2. **Remove the secret** - If real, remove it from the staged files
-3. **For false positives** - Add pattern to `.gitleaksignore`
+3. **For false positives** - Add pattern to `.gitleaksignore` (Gitleaks) or
+   `.secretsignore` (ripsecrets)
 
 ### Bypass (Use With Extreme Caution)
 

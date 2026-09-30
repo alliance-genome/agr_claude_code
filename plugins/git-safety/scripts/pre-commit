@@ -6,6 +6,10 @@
 # Gate 2: dangerous filenames (histories, keys, credentials)
 # Gate 3: Gitleaks content scan
 # Gate 4: TruffleHog content scan
+# Gate 5: ripsecrets content scan (offline, no config needed)
+#
+# Installed either by copying into the hooks directory (/secure-repo) or via
+# the pre-commit framework (hook id `git-safety` in .pre-commit-hooks.yaml).
 #
 # Optional config: ~/.config/git-safety/config may set GIT_SAFETY_PRIVATE_PARENT.
 
@@ -23,6 +27,10 @@ fi
 
 HOOK_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 LIB="${HOOK_DIR}/git-safety-lib.sh"
+# When run in place from the plugin checkout (the pre-commit framework does
+# this), the library sits in scripts/lib/ rather than beside the hook.
+[ -f "$LIB" ] || [ ! -f "${HOOK_DIR}/lib/git-safety-lib.sh" ] \
+    || LIB="${HOOK_DIR}/lib/git-safety-lib.sh"
 
 if [ ! -f "$LIB" ]; then
     echo "=========================================="
@@ -298,6 +306,66 @@ if command -v trufflehog &> /dev/null; then
     echo "[TruffleHog] No secrets detected"
 else
     echo "[TruffleHog] WARNING: not installed, skipping content scan"
+fi
+
+# ============================================================
+# GATE 5: ripsecrets
+# ============================================================
+# A single static binary with no config and no network access, so it still
+# scans when Gitleaks and TruffleHog are missing. Runs last because it may
+# add .secretsignore to the spool, which the other scanners must not see.
+if command -v ripsecrets &> /dev/null; then
+    echo "[ripsecrets] Scanning staged files for secrets..."
+    RS_FILES=$(mktemp) || { echo "COMMIT BLOCKED - Git Safety: mktemp failed"; exit 1; }
+    RS_OUT=$(mktemp) || { rm -f "$RS_FILES"; echo "COMMIT BLOCKED - Git Safety: mktemp failed"; exit 1; }
+    for file in "${STAGED[@]}"; do
+        [ -z "$file" ] && continue
+        gs_is_gitlink "$file" && continue
+        printf '%s\0' "$file"
+    done > "$RS_FILES"
+    # ripsecrets reads .secretsignore from its working directory. Use the
+    # INDEX copy (same rule as .gitsafety-allow) so exemptions are reviewable.
+    if [ ! -e "$TEMP_DIR/.secretsignore" ]; then
+        git show ":.secretsignore" > "$TEMP_DIR/.secretsignore" 2>/dev/null \
+            || rm -f "$TEMP_DIR/.secretsignore"
+    fi
+    # Explicit file arguments: walking the directory would skip dotfiles such
+    # as .env. xargs keeps a large commit under ARG_MAX.
+    RS_RC=0
+    (cd "$TEMP_DIR" && xargs -0 ripsecrets --strict-ignore -- < "$RS_FILES") \
+        > "$RS_OUT" 2>&1 || RS_RC=$?
+    rm -f "$RS_FILES"
+    if [ $RS_RC -ne 0 ]; then
+        echo ""
+        echo "=========================================="
+        if grep -qE ':[0-9]+:' "$RS_OUT"; then
+            echo "COMMIT BLOCKED - ripsecrets Found Secrets"
+            echo "=========================================="
+            # Print file:line only; ripsecrets echoes the whole matching line.
+            awk 'match($0, /:[0-9]+:/) { print "  " substr($0, 1, RSTART + RLENGTH - 2) }' "$RS_OUT"
+            echo ""
+            echo "False positive? Add it to .secretsignore (see ripsecrets docs)"
+        else
+            echo "COMMIT BLOCKED - ripsecrets failed (exit $RS_RC)"
+            echo "=========================================="
+            cat "$RS_OUT"
+            echo "Refusing to commit unscanned."
+        fi
+        rm -f "$RS_OUT"
+        stop_banner
+        exit 1
+    fi
+    rm -f "$RS_OUT"
+    echo "[ripsecrets] No secrets detected"
+else
+    echo "[ripsecrets] not installed, skipping (optional: brew install ripsecrets)"
+fi
+
+if ! command -v gitleaks &> /dev/null && ! command -v trufflehog &> /dev/null \
+   && ! command -v ripsecrets &> /dev/null; then
+    echo ""
+    echo "[Git Safety] WARNING: no content scanner is installed - staged content"
+    echo "[Git Safety]          was NOT scanned for secrets. Run /secure-repo."
 fi
 
 echo "[Git Safety] All checks passed"
