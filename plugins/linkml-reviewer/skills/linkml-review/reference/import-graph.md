@@ -93,6 +93,7 @@ graph TD
   ingest --> allele
   ingest --> biologicalEntitySet
   ingest --> core
+  ingest --> expression
   ingest --> gene
   ingest --> image
   ingest --> ontologyTerm
