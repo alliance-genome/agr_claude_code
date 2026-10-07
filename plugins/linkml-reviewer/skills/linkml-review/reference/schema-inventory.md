@@ -2,7 +2,7 @@
 
 File inventory for `agr_curation_schema/model/schema/` with class, slot, and enum counts per file.
 
-**Total**: 27 files, 368 classes, 13 enums, ~12,626 lines
+**Total**: 27 files, 371 classes, 13 enums, ~12,837 lines
 
 | File | Classes | Slots | Enums | Domain |
 |------|--------:|------:|------:|--------|
@@ -16,13 +16,13 @@ File inventory for `agr_curation_schema/model/schema/` with class, slot, and enu
 | controlledVocabulary.yaml | 3 | 5 | 0 | Vocabularies |
 | core.yaml | 59 | 144 | 1 | Foundation |
 | curationReport.yaml | 3 | 10 | 0 | Reports |
-| expression.yaml | 11 | 43 | 0 | Expression |
+| expression.yaml | 14 | 54 | 0 | Expression |
 | gene.yaml | 14 | 37 | 0 | Genes |
 | geneInteraction.yaml | 8 | 28 | 0 | Interactions |
 | highThroughputExpression.yaml | 15 | 39 | 3 | HTP expression |
 | homology.yaml | 4 | 14 | 0 | Orthology/Paralogy |
 | image.yaml | 4 | 16 | 0 | Images |
-| ingest.yaml | 1 | 54 | 0 | Data loading |
+| ingest.yaml | 1 | 55 | 0 | Data loading |
 | modCorpusAssociation.yaml | 1 | 3 | 1 | MOD corpus |
 | ontologyTerm.yaml | 54 | 16 | 0 | Ontology terms |
 | phenotypeAndDiseaseAnnotation.yaml | 26 | 65 | 0 | Annotations |
