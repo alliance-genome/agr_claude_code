@@ -115,7 +115,7 @@ curl -s -X POST -u "${JIRA_EMAIL}:${JIRA_API_KEY}" \
 ## Common Workflow Patterns
 
 ### Start Working on a Ticket
-1. GET ticket to verify you're the assignee
+1. GET ticket to confirm its key and current state. User-requested transitions are allowed regardless of assignee, subject to Jira permissions.
 2. Transition to "In Progress" (ID: 21)
 
 ### Complete a Ticket
