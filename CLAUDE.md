@@ -110,7 +110,7 @@ To refresh marketplace after changes:
 
 - Credentials stored at `~/.alliance/jira/.env`
 - Uses Jira REST API v3 with Basic Auth
-- Safety rule: Comments can be added to any accessible ticket; other modifications require ownership, except AGRHELP close/comment actions
+- Safety rule: Perform user-requested edits on any ticket Jira permits the authenticated user to modify, regardless of assignee or reporter. GET the ticket first, preserve unrelated content, and stop on Jira permission errors; never switch credentials or reassign tickets to work around a denial.
 - JQL searches use `/rest/api/3/search/jql` (GET or POST)
 - Description/comment fields require Atlassian Document Format (ADF)
 
