@@ -120,10 +120,10 @@ Load these files only when needed for the specific task:
 
 ## Safety Rules
 
-1. **Comments are allowed on any ticket the authenticated user can access.** For all other modifications (status changes, field edits, reassignment, etc.), only modify tickets assigned to the authenticated user.
-2. **Exception: AGRHELP tickets** - can close/comment on any accessible AGRHELP ticket even when assigned to someone else
+1. **Perform user-requested modifications on any ticket that Jira permits the authenticated user to modify**, including tickets assigned to someone else or unassigned tickets. This applies to field edits (including descriptions, acceptance criteria, and steps to reproduce), status changes, reassignment, comments, and other supported operations. Assignee and reporter identity are not authorization requirements.
+2. **Jira permissions remain authoritative across all projects, including AGRHELP.** Access to a ticket does not guarantee permission for every operation. If Jira denies an operation, stop and report the error; do not switch credentials or reassign the ticket to work around the denial.
 3. **NEVER expose API credentials** in output
-4. **Always GET ticket first** before any modification to verify current state and assignee. For non-comment changes outside AGRHELP, verify ownership before proceeding.
+4. **Always GET ticket first** before any modification to confirm the ticket key and current state. Preserve unrelated content and fields; do not refuse an otherwise authorized request because of the assignee or reporter.
 5. **NEVER pipe curl output through python3** - this causes intermittent empty-stdin failures. Read raw JSON output from curl directly. You can parse JSON without python.
 6. **AI attribution on comments** - Every Jira comment drafted by an AI agent MUST end with a subscript attribution line: *"This comment was drafted by `<agent name>`."* (e.g., "Claude", "Codex"). Use ADF `subsup` mark with `sub` type for the attribution. This is non-negotiable — watchers and stakeholders need to know when a comment was AI-generated.
 
@@ -277,6 +277,6 @@ See operations/create-tickets.md for full ADF examples.
 | Piping curl output to `python3` for JSON parsing | **NEVER do this** - causes intermittent empty-stdin failures. Read raw curl JSON output directly. |
 | Plain text in description/comment fields | Use Atlassian Document Format (ADF) - see above |
 | Transitioning to Done without resolution | Include `"fields": {"resolution": {"name": "Done"}}` |
-| Modifying tickets not assigned to you | Always GET ticket first to verify assignee |
+| Refusing edits because a ticket is assigned to someone else or unassigned | Fetch the ticket first, then perform the requested change subject to Jira permissions |
 | Pasting API token in chat | Edit `~/.alliance/jira/.env` directly |
 | Missing `X-Atlassian-Token` on attachments | Add header: `X-Atlassian-Token: no-check` |

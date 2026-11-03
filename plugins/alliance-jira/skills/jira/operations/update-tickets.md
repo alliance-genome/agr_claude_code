@@ -1,5 +1,20 @@
 # Update Tickets
 
+## Authorization and Current State
+
+For every operation below, first GET the ticket to confirm its key and current
+state, and preserve unrelated content and fields. Perform the user-requested
+change using the authenticated user's Jira permissions, regardless of whether
+the ticket is assigned to that user, someone else, or nobody. The reporter does
+not impose an additional restriction. This applies across all projects,
+including AGRHELP, and covers description, acceptance criteria, steps to
+reproduce, and other field edits as well as transitions, reassignment, comments,
+and the other operations below.
+
+Ticket visibility alone does not grant permission to modify it. If Jira denies
+an operation, stop and report the error; do not switch credentials or reassign
+the ticket to work around the denial.
+
 ## Change Status (Transition)
 
 ### Get Available Transitions First
@@ -178,9 +193,9 @@ curl -s -u "${JIRA_EMAIL}:${JIRA_API_KEY}" \
 > `"type": "sub"` and text like `"This comment was drafted by Claude."` (or
 > whatever agent name applies — e.g., "Codex"). See the example below.
 >
-> **Ownership rule:** Comments may be posted on tickets assigned to other people as
-> long as the authenticated user can access the ticket. Fetch the ticket first so
-> you can confirm the key, current state, and visibility before posting.
+> **Jira permissions:** Comments follow the authorization and current-state
+> checks above, just like other modifications. Ticket assignment does not restrict
+> commenting; Jira must permit the authenticated user to add the comment.
 
 ```bash
 source ~/.alliance/jira/.env

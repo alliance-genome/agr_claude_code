@@ -246,7 +246,7 @@ curl -s -X POST -u "${JIRA_EMAIL}:${JIRA_API_KEY}" \
 
 ## Safety Rules for Blue Team
 
-1. **Only transition your own assigned tickets** unless explicitly requested
+1. **Perform user-requested transitions subject to Jira permissions**, regardless of ticket assignment. GET the ticket first to confirm its key and current state.
 2. **Don't close Spikes without checking** - they may have follow-up action items
 3. **Ready for UAT requires tested code** - don't transition without working implementation
 4. **PO Review is post-production** - only use after deployment to prod
