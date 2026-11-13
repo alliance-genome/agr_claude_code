@@ -2,7 +2,7 @@
 
 Generated from all classes in `agr_curation_schema/model/schema/*.yaml`. Includes source file and `[abstract]` markers.
 
-**6 root classes** (no in-repo parent): AuditedObject, AuditedObjectDTO, GeneOntologyAnnotationDTO, Identifier, IdentifiersRange, Ingest
+**9 root classes** (no in-repo parent): AuditedObject, AuditedObjectDTO, GeneOntologyAnnotationDTO, Identifier, IdentifiersRange, Ingest, ModVariant, ModVariantConsequence, ModVariantExport
 
 **Max depth**: 7 | **Abstract classes**: 40
 
@@ -388,4 +388,7 @@ GeneOntologyAnnotationDTO (gene.yaml) -- standalone root
 Identifier (core.yaml) -- standalone root
 IdentifiersRange (core.yaml) -- standalone root
 Ingest (ingest.yaml) -- tree_root: true
+ModVariant (variantOutput.yaml) -- standalone root
+ModVariantConsequence (variantOutput.yaml) -- standalone root
+ModVariantExport (variantOutput.yaml) -- standalone root
 ```

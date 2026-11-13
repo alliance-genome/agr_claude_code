@@ -2,7 +2,7 @@
 
 File inventory for `agr_curation_schema/model/schema/` with class, slot, and enum counts per file.
 
-**Total**: 27 files, 369 classes, 13 enums, ~12,848 lines
+**Total**: 28 files, 372 classes, 13 enums, ~13,032 lines
 
 | File | Classes | Slots | Enums | Domain |
 |------|--------:|------:|------:|--------|
@@ -32,6 +32,7 @@ File inventory for `agr_curation_schema/model/schema/` with class, slot, and enu
 | resourceDescriptor.yaml | 2 | 6 | 0 | URL templates |
 | variantConsequence.yaml | 1 | 0 | 0 | VEP predictions |
 | variantDTO.yaml | 12 | 10 | 0 | Variant ingest |
+| variantOutput.yaml | 3 | 0 | 0 | Unknown |
 | variation.yaml | 12 | 31 | 0 | Variants |
 
 ## Enum Inventory
