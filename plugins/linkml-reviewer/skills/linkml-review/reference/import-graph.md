@@ -50,6 +50,7 @@ graph TD
   allianceModel --> resource
   allianceModel --> variantConsequence
   allianceModel --> variantDTO
+  allianceModel --> variantOutput
   allianceModel --> variation
   biologicalEntitySet --> core
   biologicalEntitySet --> gene
@@ -124,6 +125,7 @@ graph TD
   variantDTO --> allele
   variantDTO --> core
   variantDTO --> variation
+  variantOutput --> core
   variation --> allele
   variation --> core
   variation --> ontologyTerm
