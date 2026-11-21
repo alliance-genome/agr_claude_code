@@ -39,10 +39,10 @@ jobs:
               core.notice('Privileged reviews require an open PR from this repository.');
               return '';
             }
-            // Bind checkout to the reviewed merge commit, including for comment events.
-            const sha = context.eventName === 'pull_request' ? context.sha : pr.merge_commit_sha;
+            // PR events provide a merge SHA. For comments, pin the current PR head.
+            const sha = context.eventName === 'pull_request' ? context.sha : pr.head.sha;
             if (!/^[0-9a-f]{40}$/.test(sha)) {
-              core.setFailed('GitHub has no merge commit available for this PR.');
+              core.setFailed('GitHub did not provide a valid commit for this PR.');
               return '';
             }
             return sha;
