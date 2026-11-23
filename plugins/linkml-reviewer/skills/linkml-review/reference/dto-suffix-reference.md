@@ -6,13 +6,13 @@ Complete mapping of non-DTO ranges to their DTO slot suffix conventions.
 
 | Suffix | Count | Purpose |
 |--------|------:|---------|
-| `_curie` | 53 | Ontology term or entity curie reference |
+| `_curie` | 54 | Ontology term or entity curie reference |
 | `_dto` | 35 | Single inlined DTO object |
 | `_identifier` | 28 | Entity identifier string |
 | `_dtos` | 26 | Multiple inlined DTO objects |
 | `_curies` | 19 | Multiple curie references |
 | `_identifiers` | 12 | Multiple entity identifiers |
-| `_ingest_set` | 52 | Ingest envelope array |
+| `_ingest_set` | 54 | Ingest envelope array |
 | `_name` | varies | VocabularyTerm name string |
 | `_names` | varies | Multiple VocabularyTerm name strings |
 

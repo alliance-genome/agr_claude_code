@@ -2,7 +2,7 @@
 
 File inventory for `agr_curation_schema/model/schema/` with class, slot, and enum counts per file.
 
-**Total**: 28 files, 372 classes, 13 enums, ~13,032 lines
+**Total**: 28 files, 376 classes, 13 enums, ~13,177 lines
 
 | File | Classes | Slots | Enums | Domain |
 |------|--------:|------:|------:|--------|
@@ -11,7 +11,7 @@ File inventory for `agr_curation_schema/model/schema/` with class, slot, and enu
 | allele.yaml | 51 | 75 | 0 | Alleles |
 | allianceMember.yaml | 1 | 1 | 0 | Alliance members |
 | allianceModel.yaml | 0 | 0 | 0 | Root aggregator |
-| biologicalEntitySet.yaml | 13 | 25 | 0 | Entity sets |
+| biologicalEntitySet.yaml | 17 | 30 | 0 | Entity sets |
 | bulkload.yaml | 8 | 27 | 4 | Bulk loading |
 | controlledVocabulary.yaml | 3 | 5 | 0 | Vocabularies |
 | core.yaml | 59 | 144 | 1 | Foundation |
@@ -22,7 +22,7 @@ File inventory for `agr_curation_schema/model/schema/` with class, slot, and enu
 | highThroughputExpression.yaml | 15 | 39 | 3 | HTP expression |
 | homology.yaml | 4 | 14 | 0 | Orthology/Paralogy |
 | image.yaml | 4 | 16 | 0 | Images |
-| ingest.yaml | 1 | 55 | 0 | Data loading |
+| ingest.yaml | 1 | 57 | 0 | Data loading |
 | modCorpusAssociation.yaml | 1 | 3 | 1 | MOD corpus |
 | ontologyTerm.yaml | 54 | 16 | 0 | Ontology terms |
 | phenotypeAndDiseaseAnnotation.yaml | 26 | 65 | 0 | Annotations |
@@ -43,7 +43,7 @@ File inventory for `agr_curation_schema/model/schema/` with class, slot, and enu
 | backend_bulk_data_type_enum | bulkload.yaml | 7 |
 | backend_bulk_load_type_enum | bulkload.yaml | 10 |
 | bulk_load_status_enum | bulkload.yaml | 10 |
-| ontology_bulk_load_type_enum | bulkload.yaml | 13 |
+| ontology_bulk_load_type_enum | bulkload.yaml | 14 |
 | strand_enum | core.yaml | 4 |
 | high_throughput_expression_assay_values | highThroughputExpression.yaml | 8 |
 | sample_type_values | highThroughputExpression.yaml | 8 |
