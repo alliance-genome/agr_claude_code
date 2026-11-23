@@ -1,0 +1,11 @@
+# Copy to .pre-commit-config.yaml at the root of the repository to protect.
+#
+# `rev: main` is only a placeholder: pre-commit never refreshes a branch name
+# once installed. Pin it to the current commit before installing:
+#   pre-commit autoupdate --freeze --repo https://github.com/alliance-genome/agr_claude_code
+#   pre-commit install
+repos:
+  - repo: https://github.com/alliance-genome/agr_claude_code
+    rev: main
+    hooks:
+      - id: git-safety

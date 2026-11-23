@@ -36,6 +36,18 @@ else
     echo "[✗] TruffleHog not found"
 fi
 
+# Optional tools - never fail setup on these
+if command -v ripsecrets &> /dev/null; then
+    echo "[✓] ripsecrets installed (optional): $(ripsecrets --version 2>&1 | head -1)"
+else
+    echo "[-] ripsecrets not found (optional offline scanner: brew install ripsecrets)"
+fi
+
+if command -v pre-commit &> /dev/null; then
+    echo "[✓] pre-commit installed (optional): $(pre-commit --version 2>&1 | head -1)"
+    echo "    The hook can be managed with pre-commit - see /secure-repo, Option A"
+fi
+
 echo ""
 
 # If both installed, we're done

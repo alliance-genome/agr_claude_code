@@ -1,0 +1,12 @@
+# Hooks this repository publishes for the pre-commit framework
+# (https://pre-commit.com). See plugins/git-safety/skills/secure-repo/SKILL.md.
+- id: git-safety
+  name: Git Safety secret scan
+  description: Block dangerous files and secrets (Gitleaks, TruffleHog, ripsecrets) in staged changes
+  entry: plugins/git-safety/scripts/pre-commit
+  language: script
+  pass_filenames: false
+  always_run: true
+  require_serial: true
+  stages: [pre-commit]
+  minimum_pre_commit_version: '3.2.0'

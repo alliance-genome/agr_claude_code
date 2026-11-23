@@ -24,8 +24,9 @@ plugins/
   git-safety/          # Secret scanning pre-commit hooks
     .claude-plugin/plugin.json
     skills/secure-repo/SKILL.md
-    scripts/pre-commit          # Git hook script
+    scripts/pre-commit          # Git hook script (also exposed via /.pre-commit-hooks.yaml)
     scripts/setup.sh            # Tool installation checker
+    templates/pre-commit-config.yaml  # Starter config for the pre-commit framework
 ```
 
 ## Plugin Development
@@ -116,6 +117,7 @@ To refresh marketplace after changes:
 
 ## Git Safety Plugin Notes
 
-- Requires Gitleaks and TruffleHog installed
+- Requires Gitleaks and TruffleHog installed; ripsecrets is optional and runs when present
+- `.pre-commit-hooks.yaml` at the repo root publishes the `git-safety` hook for the pre-commit framework; its `entry` path must track `plugins/git-safety/scripts/pre-commit`
 - Hook blocks commits containing detected secrets
 - Uses `$CLAUDE_PLUGIN_ROOT` to reference scripts directory
