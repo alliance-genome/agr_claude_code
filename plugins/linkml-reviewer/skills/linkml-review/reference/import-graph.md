@@ -2,9 +2,9 @@
 
 Mermaid diagram of all import relationships between schema files in `agr_curation_schema/model/schema/`.
 
-**Note**: A 17-file strongly connected component (SCC) exists. The import graph is intentionally interdependent, not layered/DAG-style. Reviewers must reason about cross-module implications.
+**Note**: A 18-file strongly connected component (SCC) exists. The import graph is intentionally interdependent, not layered/DAG-style. Reviewers must reason about cross-module implications.
 
-**SCC members**: affectedGenomicModel, agent, allele, allianceMember, controlledVocabulary, core, expression, gene, image, ontologyTerm, phenotypeAndDiseaseAnnotation, reagent, reference, resource, resourceDescriptor, variantConsequence, variation
+**SCC members**: affectedGenomicModel, agent, allele, allianceMember, controlledVocabulary, core, expression, gene, image, nucleicAcidReagent, ontologyTerm, phenotypeAndDiseaseAnnotation, reagent, reference, resource, resourceDescriptor, variantConsequence, variation
 
 ```mermaid
 graph TD
@@ -43,6 +43,7 @@ graph TD
   allianceModel --> image
   allianceModel --> ingest
   allianceModel --> modCorpusAssociation
+  allianceModel --> nucleicAcidReagent
   allianceModel --> ontologyTerm
   allianceModel --> phenotypeAndDiseaseAnnotation
   allianceModel --> reagent
@@ -97,6 +98,7 @@ graph TD
   ingest --> expression
   ingest --> gene
   ingest --> image
+  ingest --> nucleicAcidReagent
   ingest --> ontologyTerm
   ingest --> phenotypeAndDiseaseAnnotation
   ingest --> reagent
@@ -105,6 +107,12 @@ graph TD
   modCorpusAssociation --> allianceMember
   modCorpusAssociation --> core
   modCorpusAssociation --> reference
+  nucleicAcidReagent --> affectedGenomicModel
+  nucleicAcidReagent --> controlledVocabulary
+  nucleicAcidReagent --> core
+  nucleicAcidReagent --> ontologyTerm
+  nucleicAcidReagent --> reagent
+  nucleicAcidReagent --> reference
   ontologyTerm --> allele
   ontologyTerm --> core
   phenotypeAndDiseaseAnnotation --> allele
@@ -115,6 +123,7 @@ graph TD
   phenotypeAndDiseaseAnnotation --> reference
   reagent --> core
   reagent --> gene
+  reagent --> nucleicAcidReagent
   reagent --> reference
   reference --> core
   resource --> core
